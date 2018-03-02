@@ -21,11 +21,13 @@ class Codel
 		System.out.println("Codel size: " + this.size);
 //		System.out.println("Codel color value: " + this.colorVal);
 		System.out.println("Codel color: " + this.colorName);
-		System.out.println("Codel's right top-most block is at [" + this.rightCol + ", " + this.rightTopRow + "] "
-				+ "and right bottom-most block is at [" + this.rightCol + ", " + this.rightBottomRow + "]");
-		System.out.println("Codel's left top-most block is at [" + this.leftCol + ", " + this.leftTopRow + "] "
-				+ " and left bottom-most block is at [" + this.leftCol + ", " + this.leftBottomRow + "]");
-		System.out.println("Codel's upper most row: " + this.topRow);
-		System.out.println("Codel's lowest row: " + this.bottomRow);
+		System.out.println("Codel's right top-most block is at [" + this.rightTopRow + ", " + this.rightCol + "] "
+				+ "and right bottom-most block is at [" + this.rightBottomRow + ", " + this.rightCol + "]");
+		System.out.println("Codel's left top-most block is at [" + this.leftTopRow + ", " + this.leftCol + "] "
+				+ " and left bottom-most block is at [" + this.leftBottomRow + ", " + this.leftCol + "]");
+		System.out.println("Codel's upper left-most row is at [" + this.topRow + ", " + this.topLeftCol + "] "
+				+ " and upper right-most block is at [" + this.topRow + ", " + this.topRightCol + "]");
+		System.out.println("Codel's lowest left-most row is at [" + this.bottomRow + ", " + this.topLeftCol + "] "
+				+ " and lowest right-most block is at [" + this.bottomRow + ", " + this.bottomRightCol + "]");
 	}
 }

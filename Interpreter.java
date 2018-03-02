@@ -41,67 +41,67 @@ public class Interpreter {
 		visited[i][j] = true;
 
 		int[][] moves = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
-		int newI, newJ;
+		int newX, newY;
 		
 		int count = 0;
 		for(int m = 0; m < 4; m++)
 		{
-			newI = nextX + moves[m][0];
-			newJ = nextY + moves[m][1];
+			newX = nextX + moves[m][0];
+			newY = nextY + moves[m][1];
 
-			if(!inBounds(newI, newJ))
+			if(!inBounds(newX, newY))
 				continue;
 
-			if(visited[newI][newJ])
+			if(visited[newX][newY])
 				continue;
 
-			System.out.println("We're looking for colorCode " + colorCode + ". At [" + newI + " " + newJ + "] is colorCode " + board[newI][newJ]);
+			System.out.println("We're looking for colorCode " + colorCode + ". At [" + newX + " " + newY + "] is colorCode " + board[newX][newY]);
 
 			String s1 = colorCode;
-			String s2 = board[newI][newJ];
+			String s2 = board[newX][newY];
 			
-//			if(!s1.equals(s2))
-//				continue;
+			if(!s1.equals(s2))
+				continue;
 			
-			System.out.println("Our colors match at " + nextX + " " + nextY);
+			System.out.println("Our colors match at " + newX + " " + newY);
 				
-			if(c.topRow > nextX)
+			if(c.topRow > newX)
 			{
-				c.topRow = nextX;
-				if(c.topLeftCol > nextY)
-					c.topLeftCol = nextY;
-				if(c.topRightCol < nextY)
-					c.topRightCol = nextY;
+				c.topRow = newX;
+				if(c.topLeftCol > newY)
+					c.topLeftCol = newY;
+				if(c.topRightCol < newY)
+					c.topRightCol = newY;
 			}
-			if(c.bottomRow < nextX)
+			if(c.bottomRow < newX)
 			{
-				c.bottomRow = nextX;
-				if(c.topLeftCol > nextY)
-					c.bottomLeftCol = nextY;
-				if(c.topRightCol < nextY)
-					c.bottomRightCol = nextY;
+				c.bottomRow = newX;
+				if(c.topLeftCol > newY)
+					c.bottomLeftCol = newY;
+				if(c.topRightCol < newY)
+					c.bottomRightCol = newY;
 			}
 			
-			if(c.leftCol > nextY)
+			if(c.leftCol > newY)
 			{
-				c.leftCol = nextY;
-				if(c.leftTopRow > nextX)
-					c.leftTopRow = nextX;
-				if(c.leftBottomRow < nextX)
-					c.leftBottomRow = nextX;
+				c.leftCol = newY;
+				if(c.leftTopRow > newX)
+					c.leftTopRow = newX;
+				if(c.leftBottomRow < newX)
+					c.leftBottomRow = newX;
 			}
 			if(c.rightCol < nextY)
 			{
 				c.rightCol = nextY;
-				if(c.rightTopRow > nextX)
-					c.rightTopRow = nextX;
-				if(c.rightBottomRow < nextX)
-					c.rightBottomRow = nextX;
+				if(c.rightTopRow > newX)
+					c.rightTopRow = newX;
+				if(c.rightBottomRow < newX)
+					c.rightBottomRow = newX;
 			}
 			count++;
 //			System.out.println("Yes");
 //			System.out.println("About to return with 1+");
-			return 1 + findSizeCodel(board, visited, c, newI, newJ, newI, newJ);
+			return 1 + findSizeCodel(board, visited, c, newX, newY, newX, newY);
 		}
 		return count;
 	}
