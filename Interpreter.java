@@ -2,25 +2,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-class Codel
-{
-	int size;
-	String colorVal;
-	String colorName;
-
-	int rightCol;
-	int rightRow;
-
-	Codel(String colorVal, String colorName, int rightCol, int rightRow)
-	{
-		this.colorVal = colorVal;
-		this.colorName = colorName;
-		this.rightCol = rightCol;
-		this.rightRow = rightRow;
-	}
-}
-
-
 public class Interpreter {
 
 	private static int totRow;
@@ -33,16 +14,16 @@ public class Interpreter {
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws FileNotFoundException
 	{
-		Codel cod1 = new Codel("11", "red", 0, 0);
-		Codel cod2 = new Codel("12", "dark red", 1, 0);
-		System.out.println(getCommand(cod1, cod2));
+		Codel cod1 = new Codel("11", "red");
+		Codel cod2 = new Codel("12", "dark red");
+//		System.out.println(getCommand(cod1, cod2));
 
 		String[][] board = readFile("pietcode.txt");
 
 //		for(int i = 0; i < totRow; i++)
 //		{
 //			for(int j = 0; j < totCol; j++)
-//				System.out.print(board[i][j] + " ");
+//				System.out.print("[" + i + ", " + j + "]");
 //			System.out.println();
 //		}
 
@@ -50,93 +31,114 @@ public class Interpreter {
 	}
 
 	// get the size of the codel being input
-	public static int getSizeCodel(String[][] board, boolean[][] visited, String init, int nextX, int nextY, int i, int j)
+	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int nextX, int nextY, int i, int j)
 	{
-		if(!inBounds(i, j))
-			return 0;
-		if(visited[i][j])
-			return 0;
+		String colorCode = c.colorVal;
+		
+		System.out.println("nextX: " + nextX + "\nnextY: " + nextY);
 
-//		System.out.println("We're in bounds and haven't been visited at " + i + ", " + j);
+		System.out.println("We're in bounds and haven't been visited at [" + nextX + ", " + nextY + "]");
 		visited[i][j] = true;
 
 		int[][] moves = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 		int newI, newJ;
-
+		
 		int count = 0;
 		for(int m = 0; m < 4; m++)
 		{
-			newI = i + moves[m][0];
-			newJ = j + moves[m][1];
+			newI = nextX + moves[m][0];
+			newJ = nextY + moves[m][1];
 
 			if(!inBounds(newI, newJ))
 				continue;
 
-//			System.out.println(newI + " and " + newJ + " are still in bounds. continuing");
-
-//			System.out.println("The new box is " + board[newI][newJ]);
-
 			if(visited[newI][newJ])
 				continue;
 
-//			System.out.println(newI + " <- newI | newJ -> " + newJ);
+			System.out.println("We're looking for colorCode " + colorCode + ". At [" + newI + " " + newJ + "] is colorCode " + board[newI][newJ]);
 
-//			System.out.println("init is : " + init + " – Here: " + board[newI][newJ]);
-
-//			System.out.println(init + " is equal to " + board[newI][newJ] + "?");
-
-			String s1 = init;
+			String s1 = colorCode;
 			String s2 = board[newI][newJ];
-
-			if(!s1.equals(s2))
+			
+//			if(!s1.equals(s2))
+//				continue;
+			
+			System.out.println("Our colors match at " + nextX + " " + nextY);
+				
+			if(c.topRow > nextX)
 			{
-				continue;
+				c.topRow = nextX;
+				if(c.topLeftCol > nextY)
+					c.topLeftCol = nextY;
+				if(c.topRightCol < nextY)
+					c.topRightCol = nextY;
 			}
-			else
+			if(c.bottomRow < nextX)
 			{
-//				System.out.println("No");
+				c.bottomRow = nextX;
+				if(c.topLeftCol > nextY)
+					c.bottomLeftCol = nextY;
+				if(c.topRightCol < nextY)
+					c.bottomRightCol = nextY;
 			}
-		count++;
+			
+			if(c.leftCol > nextY)
+			{
+				c.leftCol = nextY;
+				if(c.leftTopRow > nextX)
+					c.leftTopRow = nextX;
+				if(c.leftBottomRow < nextX)
+					c.leftBottomRow = nextX;
+			}
+			if(c.rightCol < nextY)
+			{
+				c.rightCol = nextY;
+				if(c.rightTopRow > nextX)
+					c.rightTopRow = nextX;
+				if(c.rightBottomRow < nextX)
+					c.rightBottomRow = nextX;
+			}
+			count++;
 //			System.out.println("Yes");
 //			System.out.println("About to return with 1+");
-			return 1 + getSizeCodel(board, visited, init, newI, newJ, newI, newJ);
+			return 1 + findSizeCodel(board, visited, c, newI, newJ, newI, newJ);
 		}
 		return count;
 	}
 
 
 	// based on the directions of the DP and the CC, return the direction of the codel that will be chosen
-	public static String codelChosen(String dp, String cc)
+	public static int codelChosen()
 	{
 		switch(dp)
 		{
 			case "right":
 				switch(cc)
 				{
-					case "left": 	return "up";
-					case "right":	return "down";
+					case "left": 	return 1;
+					case "right":	return 0;
 				}
 			case "down":
 				switch(cc)
 				{
-					case "left":		return "right";
-					case "right":	return "left";
+					case "left":		return 3;
+					case "right":	return 2;
 				}
 			case "left":
 				switch(cc)
 				{
-					case "left":		return "down";
-					case "right":	return "up";
+					case "left":		return 5;
+					case "right":	return 4;
 				}
 			case "up":
 				switch(cc)
 				{
-					case "left":		return "left";
-					case "right":	return "right";
+					case "left":		return 7;
+					case "right":	return 6;
 				}
 		}
 
-		return "up";
+		return 0;
 	}
 
 	//
@@ -301,6 +303,7 @@ public class Interpreter {
 		return board;
 	}
 
+	// by now we've read in the file and pass it in through board
 	public static void readBoard(String[][] board)
 	{
 
@@ -310,12 +313,20 @@ public class Interpreter {
 				visited[i][j] = false;
 
 		// initiate
-		int initSize = 1 + getSizeCodel(board, visited, board[0][0], 0, 0, 0, 0);
+		Codel init = new Codel(board[0][0], codelIntoString(board[0][0]));
+		int initSize = 1 + findSizeCodel(board, visited, init, 0, 0, 0, 0);
 //		System.out.println(num);
-		Codel init = new Codel(board[0][0], codelIntoString(board[0][0]), 0, 0);
-		init.size = initSize;
-		printCodel(init);
 
+		init.size = initSize;
+		init.printCodel();
+
+		int nextCodel;
+		nextCodel = codelChosen();
+		
+		int[] priorityXY = new int[3];
+		priorityXY = getPriorityXY(nextCodel, init);
+		
+		System.out.println("Looking for next Codel from " + priorityXY[1] + " and " + priorityXY[2] + " while prioritizing " + ((priorityXY[0] == 1) ? "x" : "y"));
 		/*
 		 * TODO:
 		 * A: Find the next Codel using DP / CC
@@ -326,13 +337,57 @@ public class Interpreter {
 
 	}
 	
-	public static void printCodel(Codel c)
+	public static int[] getPriorityXY(int nextCodel, Codel init)
 	{
-		System.out.println("Codel size: " + c.size);
-		System.out.println("Codel color value: " + c.colorVal);
-		System.out.println("Codel color: " + c.colorName);
-		System.out.println("Codel's right most column: " + c.rightCol);
-		System.out.println("Codel's right most row: " + c.rightRow);
+		int nextBoardPlaceX = -1, nextBoardPlaceY = -1;
+		boolean prioritizeX = false, prioritizeY = false;
+		if(nextCodel == 0) {
+			prioritizeX = true; prioritizeY = false;
+			nextBoardPlaceX = init.rightCol;
+			nextBoardPlaceY = init.bottomRow;
+		} else if(nextCodel == 1)
+		{
+			prioritizeX = true; prioritizeY = false;
+			nextBoardPlaceX = init.rightCol;
+			nextBoardPlaceY = init.topRow;
+		} else if(nextCodel == 2)
+		{
+			prioritizeY = true; prioritizeX = false;
+			nextBoardPlaceX = init.leftCol;
+			nextBoardPlaceY = init.bottomRow;
+		} else if(nextCodel == 3)
+		{
+			prioritizeY = true; prioritizeX = false;
+			nextBoardPlaceX = init.rightCol;
+			nextBoardPlaceY = init.bottomRow;
+		} else if(nextCodel == 4)
+		{
+			prioritizeX = true; prioritizeY = false;
+			nextBoardPlaceX = init.leftCol;
+			nextBoardPlaceY = init.topRow;
+		} else if(nextCodel == 5)
+		{
+			prioritizeX = true; prioritizeY = false;
+			nextBoardPlaceX = init.leftCol;
+			nextBoardPlaceY = init.bottomRow;
+		} else if(nextCodel == 6)
+		{
+			prioritizeY = true; prioritizeX = false;
+			nextBoardPlaceX = init.rightCol;
+			nextBoardPlaceY = init.topRow;
+		} else if(nextCodel == 7)
+		{
+			prioritizeY = true; prioritizeX = false;
+			nextBoardPlaceX = init.leftCol;
+			nextBoardPlaceY = init.topRow;
+		}
+		
+		int priX = 0;
+		if(prioritizeX)
+			priX = 1;
+		
+		int[] temp = {priX, nextBoardPlaceX, nextBoardPlaceY};
+		return temp;
 	}
 
 
