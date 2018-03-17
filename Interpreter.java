@@ -1,6 +1,5 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Interpreter {
 
@@ -9,23 +8,20 @@ public class Interpreter {
 
 	private static String dp = "right";
 	private static String cc = "left";
+	
+	private static Stack<Integer> stack = new Stack<Integer>();
 
 	// This assumes we have a Piet photo that has been transcribed into numbers (I will, at some point, make this program separate)
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws FileNotFoundException
 	{
-		Codel cod1 = new Codel("11", "red");
-		Codel cod2 = new Codel("12", "dark red");
-//		System.out.println(getCommand(cod1, cod2));
-
+		
 		String[][] board = readFile("pietcode.txt");
-
-//		for(int i = 0; i < totRow; i++)
-//		{
-//			for(int j = 0; j < totCol; j++)
-//				System.out.print("[" + i + ", " + j + "]");
-//			System.out.println();
-//		}
+		
+		int[] f = {0, 0};
+		int[] g = {0, 1};
+		Codel cod1 = new Codel(f, board);
+		Codel cod2 = new Codel(g, board);
 
 		readBoard(board);
 	}
@@ -68,6 +64,7 @@ public class Interpreter {
 				board[i][j] = brokenLine[j];
 			}
 		}
+		System.out.println(totCol);
 
 		s1.close();
 		s2.close();
@@ -84,35 +81,72 @@ public class Interpreter {
 			for(int j = 0; j < totCol; j++)
 				visited[i][j] = false;
 
+		int nextRow = 0;
+		int nextCol = 0;
+		
+		Codel[] codels = new Codel[2];
+	
 		// initiate
-		Codel init = new Codel(board[0][0], codelIntoString(board[0][0]));
-//		init.printCodel();
-		int initSize = 1 + findSizeCodel(board, visited, init, 0, 0);
-//		System.out.println(num);
+		int[] f = {nextRow, nextCol};
+		codels[0] = new Codel(f, board);
+		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
 
-		init.size = initSize;
-		init.printCodel();
+		codels[0].size = initSize;
+//		codels[0].printCodel();
 
 		int nextCodel;
 		nextCodel = codelChosen();
 		
 		int[] priorityXY = new int[3];
-		priorityXY = getPriorityXY(nextCodel, init);
+		priorityXY = getPriorityXY(nextCodel, codels[0]);
+//		System.out.println(priorityXY[0] + " " + priorityXY[1] + " " + priorityXY[1]);
+
+		while(true)
+		{
+			nextRow = codels[0].rightTop[0];
+			nextCol = codels[0].rightTop[1];
+			nextCol++;
+
+			while(Integer.parseInt(board[nextRow][nextCol]) == 1 && dp.equals("right"))
+			{
+				nextCol++;
+			}
+	
+//			System.out.println(board[nextRow][nextCol]);
+			int[] g = {nextRow, nextCol};
+			codels[1] = new Codel(g, board);
+			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
+			codels[1].size = initSize;
+//			codels[1].printCodel();
+			
+			getCommand(codels[0], codels[1]);
+//			System.out.println(Arrays.toString(stack.toArray()));
+			codels[0] = codels[1];
+			nextRow = codels[0].rightTop[0];
+			nextCol = codels[0].rightTop[1];
+			
+//			System.out.println(Arrays.toString(stack.toArray()));
+		}
 		
-		
-		
-//		System.out.println("Looking for next Codel from row " + priorityXY[2] + " and column " + priorityXY[1] + " while prioritizing " + ((priorityXY[0] == 1) ? "x" : "y"));
-		
-//		init.printYesBoard(totRow, totCol);
-		/*
-		 * Do:
-		 * 0: Get the block furthest in the direction of the dp
-		 * 			If dp: -> then get block furthest in right direction
-		 * A: Find the next Codel using DP / CC
-		 * B: Get the difference between the last two Codels
-		 * C: Perform the operation
-		 * GOTO: A
-		 */
+//		init = init2;
+//		
+//		nextCol++;
+//		while(Integer.parseInt(board[nextRow][nextCol]) == 1 && dp.equals("right"))
+//		{
+//			nextCol++;
+//		}
+//
+//		System.out.println(board[nextRow][nextCol]);
+//		g[0] = nextRow;
+//		g[1] = nextCol;
+//		System.out.println(nextRow + " " + nextCol);
+//		init2 = new Codel(g, board);
+//		System.out.println(board[g[0]][g[1]]);
+//		initSize = 1 + findSizeCodel(board, visited, init2, g[0], g[1]);
+//		init2.size = initSize;
+//		init2.printCodel();
+//		
+//		getCommand(init, init2);
 
 	}
 	
@@ -121,30 +155,19 @@ public class Interpreter {
 	// get the size of the codel being input
 	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int nextX, int nextY)
 	{
-//		if(c.topRow == 0 && c.bottomRow == 0)
-//		{
-//			c.topRow = nextX;
-//			c.topRow = nextX;
-//			c.topLeftCol = nextY;
-//			c.topRightCol = nextY;
-//			c.bottomLeftCol = nextY;
-//			c.bottomRightCol = nextY;
-//		}
-		
-//		System.out.println("nextX: " + nextX + "\nnextY: " + nextY);
-
-//		System.out.println("We're in bounds and haven't been visited at [" + nextX + ", " + nextY + "]");
-//		setCorners(c, nextX, nextY);
+		// this codel is uninitiated
 		if(c.rightTop[0] == -1)
 		{
 			setCorners(c, nextX, nextY);
 		}
+		
 		visited[nextX][nextY] = true;
 
 		int[][] moves = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 		int newX = 0, newY = 0;
-		
 		int count = 0;
+		
+		// moving in 4 cardinal directions
 		for(int m = 0; m < 4; m++)
 		{
 			newX = nextX + moves[m][0];
@@ -156,7 +179,7 @@ public class Interpreter {
 			if(visited[newX][newY])
 				continue;
 
-			System.out.println("We're looking for colorCode " + c.colorVal + ". At [" + newX + " " + newY + "] is colorCode " + board[newX][newY]);
+//			System.out.println("We're looking for colorCode " + c.colorVal + ". At [" + newX + " " + newY + "] is colorCode " + board[newX][newY]);
 //			System.out.println("newest colorcode : " + board[newX][newY]);
 			
 			String colorCode = c.colorVal;
@@ -167,9 +190,9 @@ public class Interpreter {
 			if(!s1.equals(s2))
 				continue;
 			
-			System.out.println("We're here from " + newX + " and " + newY);
+//			System.out.println("We're here from " + newX + " and " + newY);
 			
-			System.out.println("Our colors match at row " + newX + " and column " + newY);
+//			System.out.println("Our colors match at row " + newX + " and column " + newY);
 //			System.out.println("[0][1] : " + board[0][1]);
 			setCorners(c, newX, newY);
 			
@@ -197,26 +220,26 @@ public class Interpreter {
 			case "right":
 				switch(cc)
 				{
+					case "right":	return 0;	
 					case "left": 	return 1;
-					case "right":	return 0;
 				}
 			case "down":
 				switch(cc)
 				{
-					case "left":		return 3;
 					case "right":	return 2;
+					case "left":		return 3;
 				}
 			case "left":
 				switch(cc)
 				{
-					case "left":		return 5;
 					case "right":	return 4;
+					case "left":		return 5;
 				}
 			case "up":
 				switch(cc)
 				{
-					case "left":		return 7;
 					case "right":	return 6;
+					case "left":		return 7;
 				}
 		}
 
@@ -224,31 +247,9 @@ public class Interpreter {
 	}
 
 	//
-	public static String codelIntoString(String val)
-	{
-		switch(val)
-		{
-			case "0": return "black";			case "1": return "white";
-			case "10": return "light red";		case "11": return "red";			case "12": return "dark red";
-			case "20": return "light yellow";	case "21": return "yellow"; 		case "22": return "dark yellow";
-			case "30": return "light green";		case "31": return "green"; 		case "32": return "dark green";
-			case "40": return "light cyan";		case "41": return "cyan";		case "42": return "dark cyan";
-			case "50": return "light blue"; 		case "51": return "blue";		case "52": return "dark blue";
-			case "60": return "light magenta";	case "61": return "magenta";		case "62": return "dark magenta";
-		}
-
-		return "white";
-
-		// red -> yellow -> green -> cyan -> blue -> magenta
-		//  11		  21       31      41      51         61
-
-		// black / white
-		//	     0       1
-
-	}
 
 	// Here, col1 represents the last color, col2 is the newest color
-	public static String getCommand(Codel cod1, Codel cod2)
+	public static void getCommand(Codel cod1, Codel cod2)
 	{
 
 		String col1 = cod1.colorVal;
@@ -272,77 +273,159 @@ public class Interpreter {
 			hueChange = 4;
 		else if(hueChange == -1)
 			hueChange = 5;
-			
+
+		int val1, val2;
+		
+//		System.out.println("hue: " + hueChange);
+//		System.out.println("light: " + lightChange);
+//		System.out.print("Working with codel num: " + cod2.colorVal + "\t");
+		try {
 		switch(hueChange)
 		{
 			case 0:
 				switch(lightChange)
 				{
 					case 0:
-						return "nop";
-					case 1:
-						return "push";
-					case 2:
-						return "pop";
+						return;
+					case 1:	// push
+//						System.out.println("pushing " + cod1.size);
+						stack.push(cod1.size);
+//						System.out.println(cod1.size);
+						return;
+					case 2: // pop
+						System.out.println("pop");
+						stack.pop();
+						
+						return;
 				}
 			case 1:
 				switch(lightChange)
 				{
-					case 0:
-						return "add";
-					case 1:
-						return "subtact";
-					case 2:
-						return "multiply";
+					case 0: // add 
+//						System.out.println("add");
+						val2 = stack.pop();
+						val1 = stack.pop();
+						stack.push(val1 + val2);
+						return;
+					case 1: // subtract
+						System.out.println("sub");
+						val2 = stack.pop();
+						val1 = stack.pop();
+						stack.push(val1 - val2);
+						return;
+					case 2: // multiply
+//						System.out.println("multiply");
+						val2 = stack.pop();
+						val1 = stack.pop();
+						stack.push(val1 * val2);
+						return;
 				}
 			case 2:
 				switch(lightChange)
 				{
-					case 0:
-						return "divide";
-					case 1:
-						return "mod";
-					case 2:
-						return "not";
+					case 0: // divide
+						val2 = stack.pop();
+						val1 = stack.pop();
+						stack.push(val1 / val2);
+						return;
+					case 1: // mod 
+						val2 = stack.pop();
+						val1 = stack.pop();
+						stack.push(correctMod(val1, val2));
+						return;
+					case 2: // not
+						val2 = stack.pop();
+						if(val2 == 0)
+							stack.push(1);
+						else
+							stack.push(0);
+						return;
 				}
 			case 3:
 				switch(lightChange)
 				{
-					case 0:
-						return "greater";
-					case 1:
-						return "pointer";
-					case 2:
-						return "switch";
+					case 0: // greater
+						val2 = stack.pop();
+						val1 = stack.pop();
+						if(val1 > val2)
+							stack.push(1);
+						else
+							stack.push(0);
+						return;
+					case 1: // pointer
+						val2 = stack.pop();
+						rotateDP(val2);
+						return;
+					case 2: // switch
+						val2 = stack.pop();
+						rotateCC(val2);
+						return;
 				}
 			case 4:
 				switch(lightChange)
 				{
-					case 0:
-						return "duplicate";
-					case 1:
-						return "roll";
-					case 2:
-						return "inNum";
+					case 0:	// duplicate
+						val2 = stack.pop();
+						stack.push(val2);
+						stack.push(val2);
+						return;
+					case 1: // roll
+						int size = stack.size();
+						val2 = stack.pop();
+						val1 = stack.pop();
+						while(val2 > 0)
+						{
+							int rollNum = stack.pop();
+							int[] vals = new int[size];
+							for(int i = 0; i < val1; i++)
+								vals[i] = stack.pop();
+							stack.push(rollNum);
+							for(int i = val1 - 1; i >= 0; i--)
+								stack.push(vals[i]);
+							val2--;
+						}
+						return;
+					case 2: // inNum
+						System.out.println("in num");
+						Scanner s = new Scanner(System.in);
+						int i = s.nextInt();
+						stack.push(i);
+						return;
 				}
 			case 5:
 				switch(lightChange)
 				{
-					case 0:
-						return "inChar";
-					case 1:
-						return "outNum";
-					case 2:
-						return "outChar";
+					case 0: // inChar
+						System.out.println("in char");
+						Scanner s = new Scanner(System.in);
+						char i = s.next().charAt(0);
+						int j = (int) i;
+						stack.push(j);
+						return;
+					case 1: // outNum
+						System.out.println("out num");
+						int k = stack.pop();
+						System.out.print(k);
+						return;
+					case 2: // outChar
+//						System.out.println("out char");
+						int l = stack.pop();
+						char m = (char) l;
+						System.out.print(m);
+						return;
 				}
 		}
+		} catch(EmptyStackException e)
+		{
+			
+		}
 
-		return "";
+		return;
 	}
 	
 	public static void setCorners(Codel c, int newX, int newY)
 	{
-		System.out.println("Testing new corner at " + newX + ", " + newY);
+//		System.out.println("Testing new corner at " + newX + ", " + newY);
 		
 		// new right-most column
 		if(newY >= c.rightTop[1] || c.rightTop[1] == -1)
@@ -458,9 +541,7 @@ public class Interpreter {
 			nextBoardPlaceY = init.topRow;
 		}
 		
-		int priX = 0;
-		if(prioritizeX)
-			priX = 1;
+		int priX = prioritizeX ? 1 : 0;
 		
 		int[] temp = {priX, nextBoardPlaceX, nextBoardPlaceY};
 		return temp;
@@ -496,5 +577,53 @@ public class Interpreter {
 			return correctMod(dividend+divisor, divisor);
 
 		return dividend % divisor;
+	}
+	
+	public static void rotateDP(int val)
+	{
+		if(val == 0)
+			return;
+		
+		if(val > 0)
+		{
+			while(val > 0)
+			{
+				if(dp.equals("right"))
+					dp = "down";
+				else if(dp.equals("down"))
+					dp = "left";
+				else if(dp.equals("left"))
+					dp = "up";
+				else
+					dp = "right";
+				val--;
+			}
+		}
+		if(val < 0)
+		{
+			while(val < 0)
+			{
+				if(dp.equals("right"))
+					dp = "up";
+				else if(dp.equals("up"))
+					dp = "left";
+				else if(dp.equals("left"))
+					dp = "down";
+				else
+					dp = "right";
+				val++;
+			}
+		}
+	}
+	
+	public static void rotateCC(int val)
+	{
+		if(correctMod(val, 2) == 2)
+			return;
+		else
+			if(cc.equals("right"))
+				cc = "left";
+			else
+				cc = "right";
 	}
 }
