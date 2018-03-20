@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Interpreter {
 
@@ -10,13 +11,14 @@ public class Interpreter {
 	private static String cc = "left";
 	
 	private static Stack<Integer> stack = new Stack<Integer>();
+	
+	private static int lastRotate = 0;
 
 	// This assumes we have a Piet photo that has been transcribed into numbers (I will, at some point, make this program separate)
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws FileNotFoundException
 	{
-		
-		String[][] board = readFile("pietcode.txt");
+		String[][] board = readFile(args[0]);
 		
 		int[] f = {0, 0};
 		int[] g = {0, 1};
@@ -24,6 +26,7 @@ public class Interpreter {
 		Codel cod2 = new Codel(g, board);
 
 		readBoard(board);
+		System.out.println();
 	}
 	
 	// reading in the file and returning it as a 2d string array
@@ -52,8 +55,9 @@ public class Interpreter {
 		{
 			wholeLine[i] = s2.nextLine();
 			String[] brokenLine = wholeLine[i].split(" ");
-			totCol = max(totCol, brokenLine.length);
+			totCol = (totCol > brokenLine.length) ? totCol : brokenLine.length;
 		}
+
 
 		String[][] board = new String[totRow][totCol];
 		for(int i = 0; i < totRow; i++)
@@ -64,7 +68,6 @@ public class Interpreter {
 				board[i][j] = brokenLine[j];
 			}
 		}
-		System.out.println(totCol);
 
 		s1.close();
 		s2.close();
@@ -72,7 +75,7 @@ public class Interpreter {
 		return board;
 	}
 	
-	// by now we've read in the file and pass it in through board
+	// by now we've read in the file and pass it in as board
 	public static void readBoard(String[][] board)
 	{
 
@@ -86,71 +89,38 @@ public class Interpreter {
 		
 		Codel[] codels = new Codel[2];
 	
-		// initiate
+		// initiate the very first Codel
 		int[] f = {nextRow, nextCol};
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
-
 		codels[0].size = initSize;
-//		codels[0].printCodel();
 
-		int nextCodel;
-		nextCodel = codelChosen();
-		
-		int[] priorityXY = new int[3];
-		priorityXY = getPriorityXY(nextCodel, codels[0]);
-//		System.out.println(priorityXY[0] + " " + priorityXY[1] + " " + priorityXY[1]);
-
-		while(true)
+		// the program will on it's own (hypothetically)
+		boolean end = false;
+		while(!end)
 		{
-			nextRow = codels[0].rightTop[0];
-			nextCol = codels[0].rightTop[1];
-			nextCol++;
-
-			while(Integer.parseInt(board[nextRow][nextCol]) == 1 && dp.equals("right"))
-			{
-				nextCol++;
-			}
-	
-//			System.out.println(board[nextRow][nextCol]);
+			// get the coords of the next Codel
+			int[] nextBlock = getNextBlock(board, codels[0], 0);
+			nextRow = nextBlock[0];
+			nextCol = nextBlock[1];
+			
 			int[] g = {nextRow, nextCol};
+			
+			// initiate the newest Codel
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
 			codels[1].size = initSize;
-//			codels[1].printCodel();
 			
+			// perform the command given by the two Codel's
 			getCommand(codels[0], codels[1]);
-//			System.out.println(Arrays.toString(stack.toArray()));
+
+			// shift the new Codel to the old one's spot
 			codels[0] = codels[1];
-			nextRow = codels[0].rightTop[0];
-			nextCol = codels[0].rightTop[1];
 			
+			// if I want to print the stack for debuggin
 //			System.out.println(Arrays.toString(stack.toArray()));
 		}
-		
-//		init = init2;
-//		
-//		nextCol++;
-//		while(Integer.parseInt(board[nextRow][nextCol]) == 1 && dp.equals("right"))
-//		{
-//			nextCol++;
-//		}
-//
-//		System.out.println(board[nextRow][nextCol]);
-//		g[0] = nextRow;
-//		g[1] = nextCol;
-//		System.out.println(nextRow + " " + nextCol);
-//		init2 = new Codel(g, board);
-//		System.out.println(board[g[0]][g[1]]);
-//		initSize = 1 + findSizeCodel(board, visited, init2, g[0], g[1]);
-//		init2.size = initSize;
-//		init2.printCodel();
-//		
-//		getCommand(init, init2);
-
 	}
-	
-
 
 	// get the size of the codel being input
 	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int nextX, int nextY)
@@ -173,9 +143,11 @@ public class Interpreter {
 			newX = nextX + moves[m][0];
 			newY = nextY + moves[m][1];
 
+			// skip this direction if out of bounds
 			if(!inBounds(newX, newY))
 				continue;
 
+			// skip this direction if already visited
 			if(visited[newX][newY])
 				continue;
 
@@ -196,7 +168,6 @@ public class Interpreter {
 //			System.out.println("[0][1] : " + board[0][1]);
 			setCorners(c, newX, newY);
 			
-			c.yesBoard[newX][newY] = 1;
 			count++;
 //			System.out.println("Yes");
 //			System.out.println("About to return with 1+");
@@ -211,43 +182,6 @@ public class Interpreter {
 		return count;
 	}
 
-
-	// based on the directions of the DP and the CC, return the direction of the codel that will be chosen
-	public static int codelChosen()
-	{
-		switch(dp)
-		{
-			case "right":
-				switch(cc)
-				{
-					case "right":	return 0;	
-					case "left": 	return 1;
-				}
-			case "down":
-				switch(cc)
-				{
-					case "right":	return 2;
-					case "left":		return 3;
-				}
-			case "left":
-				switch(cc)
-				{
-					case "right":	return 4;
-					case "left":		return 5;
-				}
-			case "up":
-				switch(cc)
-				{
-					case "right":	return 6;
-					case "left":		return 7;
-				}
-		}
-
-		return 0;
-	}
-
-	//
-
 	// Here, col1 represents the last color, col2 is the newest color
 	public static void getCommand(Codel cod1, Codel cod2)
 	{
@@ -258,28 +192,20 @@ public class Interpreter {
 		int hueChange = Character.getNumericValue(col2.charAt(0)) - Character.getNumericValue(col1.charAt(0));
 		int lightChange = Character.getNumericValue(col2.charAt(1)) - Character.getNumericValue(col1.charAt(1));
 
-		if(lightChange == -2)
-			lightChange = 1;
-		else if(lightChange == -1)
-			lightChange = 2;
-
-		if(hueChange == -5)
-			hueChange = 1;
-		else if(hueChange == -4)
-			hueChange = 2;
-		else if(hueChange == -3)
-			hueChange = 3;
-		else if(hueChange == -2)
-			hueChange = 4;
-		else if(hueChange == -1)
-			hueChange = 5;
-
+		if(hueChange < 0)
+			hueChange += 6;
+		if(lightChange < 0)
+			lightChange += 3;
+		
+//		lightChange = correctMod(lightChange, 3);
+//		hueChange = correctMod(lightChange, 6);
+		
 		int val1, val2;
 		
-//		System.out.println("hue: " + hueChange);
-//		System.out.println("light: " + lightChange);
-//		System.out.print("Working with codel num: " + cod2.colorVal + "\t");
-		try {
+		System.out.println("hue: " + hueChange);
+		System.out.println("light: " + lightChange);
+
+	try {
 		switch(hueChange)
 		{
 			case 0:
@@ -308,7 +234,7 @@ public class Interpreter {
 						stack.push(val1 + val2);
 						return;
 					case 1: // subtract
-						System.out.println("sub");
+//						System.out.println("sub");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(val1 - val2);
@@ -411,140 +337,143 @@ public class Interpreter {
 //						System.out.println("out char");
 						int l = stack.pop();
 						char m = (char) l;
-						System.out.print(m);
+						System.out.println(m);
 						return;
 				}
 		}
-		} catch(EmptyStackException e)
-		{
-			
-		}
-
+	} catch(EmptyStackException e) {	}
+	
 		return;
 	}
 	
+	// newX = row [0], newY = column [1]
 	public static void setCorners(Codel c, int newX, int newY)
 	{
 //		System.out.println("Testing new corner at " + newX + ", " + newY);
 		
-		// new right-most column
+		// potential for new right column value
 		if(newY >= c.rightTop[1] || c.rightTop[1] == -1)
 		{
+			// if further right
 			if(newY > c.rightTop[1] || c.rightTop[1] == -1) 
 			{
 //				System.out.println("new right-most column");
 				c.rightTop[1] = newY;
 				c.rightTop[0] = newX;
 			}
+			// if further up
 			if(newX < c.rightTop[0] || c.rightTop[0] == -1)
 			{
 //				System.out.println("new right-most row");
 				c.rightTop[1] = newY;
 				c.rightTop[0] = newX;
 			}
+			// if further right
+			if(newY > c.rightBottom[1] || c.rightBottom[1] == -1)
+			{
+				c.rightBottom[1] = newY;
+				c.rightBottom[0] = newX;
+			}
+			// if further down
+			if(newX > c.rightBottom[0] || c.rightBottom[0] == -1)
+			{
+				c.rightBottom[1] = newY;
+				c.rightBottom[0] = newX;
+			}
 		}
 
-		// new bottom-most row
+		// potential for new bottom row value
 		if(newX >= c.bottomRight[0] || c.bottomRight[0] == -1)
 		{
+			// if further down
 			if(newX > c.bottomRight[0] || c.bottomRight[0] == -1)
 			{
 //				System.out.println("new bottom-most row");
 				c.bottomRight[0] = newX;
 				c.bottomRight[1] = newY;
 			}
+			// if further right
 			if(newY > c.bottomRight[1] || c.bottomRight[1] == -1)
 			{
 //				System.out.println("new bottom-most column");
 				c.bottomRight[1] = newY;
 				c.bottomRight[0] = newX;
 			}
+			// if further down
+			if(newX > c.bottomLeft[1] || c.bottomLeft[1] == -1)
+			{
+				c.bottomLeft[1] = newY;
+				c.bottomLeft[0] = newX;
+			}
+			// if further left
+			if(newY < c.bottomLeft[1] || c.bottomLeft[1] == -1 || c.bottomLeft[0] == -1)
+			{
+				c.bottomLeft[1] = newY;
+				c.bottomLeft[0] = newX;
+			}
 		}
 		
-		// new left-most column
+		// potential for new left column value
 		if(newY <= c.leftBottom[1] || c.leftBottom[1] == -1)
 		{
+			// if further left
 			if(newY < c.leftBottom[1] || c.leftBottom[1] == -1)
 			{
 //				System.out.println("new left-most column");
 				c.leftBottom[1] = newY;
 				c.leftBottom[0] = newX;
 			}
+			// if further down
 			if(newX > c.leftBottom[0] || c.leftBottom[0] == -1)
 			{
 //				System.out.println("new left-most row");
 				c.leftBottom[1] = newY;
 				c.leftBottom[0] = newX;
 			}
+			// if further left
+			if(newY < c.leftTop[0] || c.leftTop[0] == -1)
+			{
+				c.leftTop[0] = newX;
+				c.leftTop[1] = newY;
+			}
+			// if further up
+			if(newX < c.leftTop[0] || c.leftTop[0] == -1)
+			{
+				c.leftTop[0] = newX;
+				c.leftTop[1] = newY;
+			}
 		}
 
-		// new top-most row
+		// potential for upper-most row
 		if(newX <= c.topLeft[0] || c.topLeft[0] == -1)
 		{
+			// if further up
 			if(newX < c.topLeft[0] || c.topLeft[0] == -1)
 			{
 //				System.out.println("new top-most row");
 				c.topLeft[0] = newX;
 				c.topLeft[1] = newY;
 			}	
+			// if further left
 			if(newY < c.topLeft[1] || c.topLeft[1] == -1)
 			{
 //				System.out.println("new top-most column");
 				c.topLeft[1] = newY;
 				c.topLeft[0] = newX;
 			}
+			// if further up
+			if(newX < c.topRight[0] || c.topRight[1] == -1)
+			{
+				c.topRight[0] = newX;
+				c.topRight[1] = newY;
+			}
+			// if further right
+			if(newY > c.topRight[1] || c.topRight[1] == -1)
+			{
+				c.topRight[1] = newY;
+				c.topRight[0] = newX;
+			}
 		}
-	}
-	
-	public static int[] getPriorityXY(int nextCodel, Codel init)
-	{
-		int nextBoardPlaceX = -1, nextBoardPlaceY = -1;
-		boolean prioritizeX = false;
-		if(nextCodel == 0) {
-			prioritizeX = true;
-			nextBoardPlaceX = init.bottomRightCol;
-			nextBoardPlaceY = init.bottomRow;
-		} else if(nextCodel == 1)
-		{
-			prioritizeX = true;
-			nextBoardPlaceX = init.topRightCol;
-			nextBoardPlaceY = init.topRow;
-		} else if(nextCodel == 2)
-		{
-			prioritizeX = false;
-			nextBoardPlaceX = init.bottomLeftCol;
-			nextBoardPlaceY = init.bottomRow;
-		} else if(nextCodel == 3)
-		{
-			prioritizeX = false;
-			nextBoardPlaceX = init.bottomRightCol;
-			nextBoardPlaceY = init.bottomRow;
-		} else if(nextCodel == 4)
-		{
-			prioritizeX = true;
-			nextBoardPlaceX = init.topLeftCol;
-			nextBoardPlaceY = init.topRow;
-		} else if(nextCodel == 5)
-		{
-			prioritizeX = true;
-			nextBoardPlaceX = init.bottomLeftCol;
-			nextBoardPlaceY = init.bottomRow;
-		} else if(nextCodel == 6)
-		{
-			prioritizeX = false;
-			nextBoardPlaceX = init.topRightCol;
-			nextBoardPlaceY = init.topRow;
-		} else if(nextCodel == 7)
-		{
-			prioritizeX = false;
-			nextBoardPlaceX = init.topLeftCol;
-			nextBoardPlaceY = init.topRow;
-		}
-		
-		int priX = prioritizeX ? 1 : 0;
-		
-		int[] temp = {priX, nextBoardPlaceX, nextBoardPlaceY};
-		return temp;
 	}
 
 	// return whether the point will be in bounds
@@ -553,34 +482,19 @@ public class Interpreter {
 		return ((i >= 0) && (i < totRow) && (j >= 0) && (j < totCol));
 	}
 
-	// return the larger of the two ints
-	private static int max(int num1, int num2) {
-		if(num1 > num2)
-			return num1;
-		else
-			return num2;
-	}
-
-	// returns the absolute value of an int (java.lang is overrated)
-	public static int abs(int num)
-	{
-		if(num < 0)
-			return -num;
-		else
-			return num;
-	}
 
 	// Java can't do modulo arithmetic correctly, so I made this
 	public static int correctMod(int dividend, int divisor)
 	{
-		if(dividend < 0)
-			return correctMod(dividend+divisor, divisor);
+		while(dividend < 0)
+			dividend += divisor;
 
 		return dividend % divisor;
 	}
 	
 	public static void rotateDP(int val)
 	{
+		lastRotate = 0;
 		if(val == 0)
 			return;
 		
@@ -618,6 +532,7 @@ public class Interpreter {
 	
 	public static void rotateCC(int val)
 	{
+		lastRotate = 1;
 		if(correctMod(val, 2) == 2)
 			return;
 		else
@@ -625,5 +540,151 @@ public class Interpreter {
 				cc = "left";
 			else
 				cc = "right";
+	}
+	
+	// we're getting the newest codel, from the old one, c
+	public static int[] getNextBlock(String[][] board, Codel c, int attempt)
+	{
+		
+		int nextBlock[] = new int[2];
+//		c.printCodel();
+		
+		// we've tried every orientation and can't find a new Codel
+		if(attempt > 7)
+		{
+			System.out.println("DONE");
+			System.exit(0);
+		}
+//		System.out.println("Attempt: " + attempt);
+		
+//		System.out.println("DP: " + dp + "   CC: " + cc);
+		
+		int nextRow = 0, nextCol = 0;
+		switch(dp)
+		{
+			// if we're going right
+			case "right":
+				switch(cc)
+				{
+					// we want to start from the right-top
+					case "left":
+						nextRow = c.rightTop[0];
+						nextCol = c.rightTop[1];
+						break;
+					// we want to start from the right-bottom
+					case "right":
+						nextRow = c.rightBottom[0];
+						nextCol = c.rightBottom[1];
+						break;
+				}
+				nextCol++;
+				
+				// theoretical, do this for all dp directions
+				// just moves through white space
+//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+//				{
+//					nextCol++;
+//				}
+				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
+				{
+					if(attempt % 2 == 0)
+						rotateCC(1);
+					else
+						rotateDP(1);
+					
+					nextCol--;
+					return getNextBlock(board, c, attempt + 1);
+				}
+				break;
+			case "down":
+				switch(cc)
+				{
+					case "left":
+						nextRow = c.bottomRight[0];
+						nextCol = c.bottomRight[1];
+						break;
+					case "right":
+						nextRow = c.bottomLeft[0];
+						nextCol = c.bottomLeft[1];
+						break;
+				}
+//				System.out.println("Starting at " + nextRow + ", " + nextCol);
+				nextRow++;
+				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
+				{
+					if(attempt % 2 == 0)
+						rotateCC(1);
+					else
+						rotateDP(1);
+					nextRow--;
+					return getNextBlock(board, c, attempt + 1);
+					
+				}
+				break;
+			case "left":
+				switch(cc)
+				{
+					case "left":
+						nextRow = c.leftBottom[0];
+						nextCol = c.leftBottom[1];
+						break;
+					case "right":
+						nextRow = c.leftTop[0];
+						nextCol = c.leftTop[1];
+						break;
+				}
+//				System.out.println("Starting at " + nextRow + ", " + nextCol);
+				nextCol--;
+				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
+				{
+					if(attempt % 2 == 0)
+						rotateCC(1);
+					else
+						rotateDP(1);
+					
+					nextCol++;
+					return getNextBlock(board, c, attempt + 1);
+				}
+				break;
+			case "up":
+				switch(cc)
+				{
+					case "left":
+						nextRow = c.topLeft[0];
+						nextCol = c.topLeft[1];
+						break;
+					case "right":
+						nextRow = c.topRight[0];
+						nextCol = c.topRight[1];
+						break;
+				}
+//				System.out.println("Starting at " + nextRow + ", " + nextCol);
+				nextRow--;
+				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
+				{
+					if(attempt % 2 == 0)
+						rotateCC(1);
+					else
+						rotateDP(1);
+					nextRow++;
+					return getNextBlock(board, c, attempt + 1);
+				}
+				break;
+		}
+
+		nextBlock[0] = nextRow;
+		nextBlock[1] = nextCol;
+//		System.out.println("Continuing from " + nextBlock[0] + ", " + nextBlock[1]);
+//		try {
+//			TimeUnit.SECONDS.sleep(1);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		String curVal = c.colorVal;
+
+//		System.out.println("Returning");
+		return nextBlock;
 	}
 }

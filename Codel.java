@@ -5,16 +5,11 @@ class Codel
 	String colorName;
 
 	//					row, col
-	int[] rightTop = 	{-1, -1};
-	int[] bottomRight = 	{-1, -1};
-	int[] leftBottom = 	{-1, -1};
-	int[] topLeft = 		{-1, -1};
-	
-	int topRow;		int topLeftCol;		int topRightCol;
-	int bottomRow; 	int bottomLeftCol;	int bottomRightCol;
-	
-	int[][] yesBoard = new int[30][30];
-	
+	int[] rightTop = 	{-1, -1};	int[] rightBottom =	{-1, -1};
+	int[] bottomRight = 	{-1, -1};	int[] bottomLeft = 	{-1, -1};
+	int[] leftBottom = 	{-1, -1};	int[] leftTop = 		{-1, -1};
+	int[] topLeft = 		{-1, -1};	int[] topRight = 	{-1, -1};
+		
 	Codel()
 	{
 		
@@ -31,26 +26,16 @@ class Codel
 		System.out.println("Codel size: " + this.size);
 		System.out.println("Codel color value: " + this.colorVal);
 		System.out.println("Codel color: " + this.colorName);
-		System.out.println("Codel's right-most & up-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
+		System.out.println("Codel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
+		System.out.println("Codel's right-most & lower-most block is at " + this.rightBottom[0] + ", " + this.rightBottom[1]);
 		System.out.println("Codel's bottom-most & right-most block is at " + this.bottomRight[0] + ", " + this.bottomRight[1]);
+		System.out.println("Codel's bottom-most & left-most block is at " + this.bottomLeft[0] + ", " + this.bottomLeft[1]);
 		System.out.println("Codel's left-most & bottom-most block is at " + this.leftBottom[0] + ", " + this.leftBottom[1]);
-		System.out.println("Codel's top-most & left-most block is at " + this.topLeft[0] + ", " + this.topLeft[1]);
-
+		System.out.println("Codel's left-most & top-most block is at " + this.leftTop[0] + ", " + this.leftTop[1]);
+		System.out.println("Codel's upper-most & left-most block is at " + this.topLeft[0] + ", " + this.topLeft[1]);
+		System.out.println("Codel's upper-most & right-most block is at " + this.topRight[0] + ", " + this.topRight[1]);
 	}
-	
-	public void printYesBoard(int numR, int numC)
-	{
-		for(int i = 0; i < numR; i++)
-		{
-			for(int j = 0; j < numC; j++)
-			{
-				System.out.print("i = " + i + "\tj = " + j + "\t");
-				System.out.print(this.yesBoard[numR][numC] + "\t\t");
-			}
-			System.out.println();
-		}
-	}
-	
+		
 	public String codelIntoString(String val)
 	{
 		switch(val)
