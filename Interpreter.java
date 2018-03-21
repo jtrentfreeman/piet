@@ -1,6 +1,9 @@
+import java.awt.image.*;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.io.File;
+
+import javax.imageio.ImageIO;
 
 public class Interpreter {
 
@@ -18,6 +21,17 @@ public class Interpreter {
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws FileNotFoundException
 	{
+		
+		File oldfile = new File("hi2.txt");
+		File newfile = new File("hi23.txt");
+		Scanner txtS = new Scanner(newfile);
+		
+		
+		if(oldfile.renameTo(newfile))
+			System.out.println("Woot");
+		else
+			System.out.println("Nah");
+		
 		String[][] board = readFile(args[0]);
 		
 		int[] f = {0, 0};
@@ -25,13 +39,19 @@ public class Interpreter {
 		Codel cod1 = new Codel(f, board);
 		Codel cod2 = new Codel(g, board);
 
-		readBoard(board);
+//		readBoard(board);
 		System.out.println();
 	}
 	
 	// reading in the file and returning it as a 2d string array
 	public static String[][] readFile(String s) throws FileNotFoundException
 	{
+		
+		File imageFile = null;
+		BufferedImage image = null;
+		
+		imageFile = new File("hi2.png");
+		
 		File infile = new File(s);
 
 		Scanner s1 = new Scanner(infile);
@@ -150,27 +170,17 @@ public class Interpreter {
 			// skip this direction if already visited
 			if(visited[newX][newY])
 				continue;
-
-//			System.out.println("We're looking for colorCode " + c.colorVal + ". At [" + newX + " " + newY + "] is colorCode " + board[newX][newY]);
-//			System.out.println("newest colorcode : " + board[newX][newY]);
 			
 			String colorCode = c.colorVal;
 			String s1 = colorCode;
 			String s2 = board[newX][newY];
-//			System.out.println("newX : " + newX + "\t\tnewY : " + newY);
 			
 			if(!s1.equals(s2))
 				continue;
 			
-//			System.out.println("We're here from " + newX + " and " + newY);
-			
-//			System.out.println("Our colors match at row " + newX + " and column " + newY);
-//			System.out.println("[0][1] : " + board[0][1]);
 			setCorners(c, newX, newY);
 			
 			count++;
-//			System.out.println("Yes");
-//			System.out.println("About to return with 1+");
 			int num = findSizeCodel(board, visited, c, newX, newY);
 			count += num;
 		}
@@ -325,7 +335,7 @@ public class Interpreter {
 						System.out.println("in char");
 						Scanner s = new Scanner(System.in);
 						char i = s.next().charAt(0);
-						int j = (int) i;
+						int j = i;
 						stack.push(j);
 						return;
 					case 1: // outNum
@@ -674,7 +684,7 @@ public class Interpreter {
 
 		nextBlock[0] = nextRow;
 		nextBlock[1] = nextCol;
-//		System.out.println("Continuing from " + nextBlock[0] + ", " + nextBlock[1]);
+		System.out.println("Continuing from " + nextBlock[0] + ", " + nextBlock[1]);
 //		try {
 //			TimeUnit.SECONDS.sleep(1);
 //		} catch (InterruptedException e) {
@@ -684,7 +694,7 @@ public class Interpreter {
 		
 		String curVal = c.colorVal;
 
-//		System.out.println("Returning");
+		System.out.println("Returning");
 		return nextBlock;
 	}
 }
