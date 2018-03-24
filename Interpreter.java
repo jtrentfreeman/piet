@@ -1,7 +1,6 @@
-import java.awt.image.*;
 import java.io.*;
 import java.util.*;
-import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -17,42 +16,222 @@ public class Interpreter {
 	
 	private static int lastRotate = 0;
 
-	// This assumes we have a Piet photo that has been transcribed into numbers (I will, at some point, make this program separate)
+	// Takes in a .ppm file as an argument, and runs it as a Piet program
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
-	public static void main(String[] args) throws FileNotFoundException
+	public static void main(String[] args) throws IOException
 	{
+				
+		File oldfile = new File("nhello.ppm");
+		String firstBit = oldfile.getName().split("\\.")[0];
+		File newfile = new File(firstBit + ".txt");
+		oldfile.renameTo(newfile);
+//		System.out.println(newfile);
+
+		convertFile(newfile.getName());
 		
-		File oldfile = new File("hi2.txt");
-		File newfile = new File("hi23.txt");
-		Scanner txtS = new Scanner(newfile);
-		
-		
-		if(oldfile.renameTo(newfile))
-			System.out.println("Woot");
-		else
-			System.out.println("Nah");
-		
-		String[][] board = readFile(args[0]);
+		String[][] board = readFile("tmp.txt");
+
+//		System.out.println(board[0][0]);
 		
 		int[] f = {0, 0};
 		int[] g = {0, 1};
-		Codel cod1 = new Codel(f, board);
-		Codel cod2 = new Codel(g, board);
+//		Codel cod1 = new Codel(f, board);
+//		Codel cod2 = new Codel(g, board);
 
-//		readBoard(board);
-		System.out.println();
+		readBoard(board);
+//		System.out.println();
+		
+//		newfile.renameTo(oldfile);
+	}
+	
+	public static void convertFile(String s) throws IOException, FileNotFoundException
+	{
+		File in = new File(s);
+		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
+		Scanner sc = new Scanner(in);
+		int numCol, numRow;
+		
+		sc.nextLine(); sc.nextLine(); 
+		String tmp = sc.nextLine();
+//		System.out.println(tmp);
+		String[] colrow = tmp.split("\\s");
+//		System.out.println(colrow[0]);
+		
+		numCol = Integer.parseInt(colrow[0]); 
+		numRow = Integer.parseInt(colrow[1]);
+		sc.nextLine();
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(in, true));
+//		System.out.println(in.getAbsolutePath());
+		String appendThis = "";
+		for(int i = 0; i < numCol*numRow; i++)
+		{
+//			System.out.println("Getting number " + i);
+			if(i % numRow == 0 && i != 0)
+			{
+//				System.out.println("new line");
+				appendThis += "\n";
+//				System.out.println("So far:\n" + appendThis);
+			}
+			int r, g, b;
+			r = sc.nextInt();
+			g = sc.nextInt();
+			b = sc.nextInt();
+//			System.out.print(r + " "+ g + " " + b + "\t\t");
+			
+			if(r == 0x00)
+			{
+				if(g == 0x00)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "00 ";
+//						System.out.println("Black");
+					}
+					else if(b == 0xC0)
+					{
+						appendThis += "52 ";
+//						System.out.println("Dark Blue");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "51 ";
+//						System.out.println("Blue");
+					}
+				}
+				else if(g == 0xC0)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "32 ";
+//						System.out.println("Dark Green");
+					}
+					else if(b == 0xC0)
+					{
+						appendThis += "32 ";
+//						System.out.println("Dark Green");
+					}
+				}
+				else if(g == 0xFF)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "31 ";
+//						System.out.println("Green");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "41 ";
+//						System.out.println("Cyan");
+					}
+				}
+			}
+			else if(r == 0xC0)
+			{
+				if(g == 0x00)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "12 ";
+//						System.out.println("Dark Red");
+					}
+					else if(b == 0xC0)
+					{
+						appendThis += "62 ";
+//						System.out.println("Dark Magenta");
+					}
+				}
+				else if(g == 0xC0)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "22 ";
+//						System.out.println("Dark Yellow");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "50 ";
+//						System.out.println("Light Blue");
+					}
+				}
+				else if(g == 0xFF)
+				{
+					if(b == 0xC0)
+					{
+						appendThis += "30 ";
+//						System.out.println("Light Green");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "40 ";
+//						System.out.println("Light Cyan");
+					}
+				}
+			}
+			else if(r == 0xFF)
+			{
+				if(g == 0x00)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "11 ";
+//						System.out.println("Red");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "61 ";
+//						System.out.println("Magenta");
+					}
+				}
+				else if(g == 0xC0)
+				{
+					if(b == 0xC0)
+					{
+						appendThis += "10 ";
+//						System.out.println("Light Red");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "60 ";
+//						System.out.println("Light Magenta");
+					}
+				}
+				else if(g == 0xFF)
+				{
+					if(b == 0x00)
+					{
+						appendThis += "21 ";
+//						System.out.println("Yellow");
+					}
+					else if(b == 0xC0)
+					{
+						appendThis += "20 ";
+//						System.out.println("Light Yellow");
+					}
+					else if(b == 0xFF)
+					{
+						appendThis += "01 ";
+//						System.out.println("White");
+					}
+				}
+			}			
+		}
+		
+//		System.out.println("here");
+//		System.out.println(appendThis);
+//		bw.write(appendThis);
+		writer.print(appendThis);
+		writer.close();
+		
 	}
 	
 	// reading in the file and returning it as a 2d string array
 	public static String[][] readFile(String s) throws FileNotFoundException
 	{
 		
-		File imageFile = null;
-		BufferedImage image = null;
-		
-		imageFile = new File("hi2.png");
-		
 		File infile = new File(s);
+		Scanner infileS = new Scanner(infile);
+//		System.out.println(infileS.nextLine());
 
 		Scanner s1 = new Scanner(infile);
 		Scanner s2 = new Scanner(infile);
@@ -114,8 +293,10 @@ public class Interpreter {
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
 		codels[0].size = initSize;
+		
+		codels[0].printCodel();
 
-		// the program will on it's own (hypothetically)
+		// the program will end on it's own (hypothetically)
 		boolean end = false;
 		while(!end)
 		{
@@ -130,6 +311,7 @@ public class Interpreter {
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
 			codels[1].size = initSize;
+			codels[1].printCodel();
 			
 			// perform the command given by the two Codel's
 			getCommand(codels[0], codels[1]);
@@ -138,56 +320,58 @@ public class Interpreter {
 			codels[0] = codels[1];
 			
 			// if I want to print the stack for debuggin
-//			System.out.println(Arrays.toString(stack.toArray()));
+			System.out.println(Arrays.toString(stack.toArray()));
+			
 		}
 	}
 
 	// get the size of the codel being input
-	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int nextX, int nextY)
+	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int a, int b)
 	{
 		// this codel is uninitiated
 		if(c.rightTop[0] == -1)
 		{
-			setCorners(c, nextX, nextY);
+			setCorners(c, a, b);
 		}
 		
-		visited[nextX][nextY] = true;
+		visited[a][b] = true;
 
 		int[][] moves = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
-		int newX = 0, newY = 0;
+		int newA = 0, newB = 0;
 		int count = 0;
 		
 		// moving in 4 cardinal directions
 		for(int m = 0; m < 4; m++)
 		{
-			newX = nextX + moves[m][0];
-			newY = nextY + moves[m][1];
+			newA = a + moves[m][0];
+			newB = b + moves[m][1];
 
 			// skip this direction if out of bounds
-			if(!inBounds(newX, newY))
+			if(!inBounds(newA, newB))
 				continue;
 
 			// skip this direction if already visited
-			if(visited[newX][newY])
+			if(visited[newA][newB])
 				continue;
 			
-			String colorCode = c.colorVal;
-			String s1 = colorCode;
-			String s2 = board[newX][newY];
+			visited[newA][newB] = true;
+			
+			String s1 = c.colorVal;
+			String s2 = board[newA][newB];
 			
 			if(!s1.equals(s2))
 				continue;
 			
-			setCorners(c, newX, newY);
+			setCorners(c, newA, newB);
 			
 			count++;
-			int num = findSizeCodel(board, visited, c, newX, newY);
+			int num = findSizeCodel(board, visited, c, newA, newB);
 			count += num;
 		}
 		
 //		c.printYesBoard(totRow, totCol);
-		if(inBounds(newX, newY))
-			return count + findSizeCodel(board, visited, c, newX, newY);
+		if(inBounds(newA, newB))
+			return count + findSizeCodel(board, visited, c, newA, newB);
 
 		return count;
 	}
@@ -560,7 +744,7 @@ public class Interpreter {
 //		c.printCodel();
 		
 		// we've tried every orientation and can't find a new Codel
-		if(attempt > 7)
+		if(attempt > 6)
 		{
 			System.out.println("DONE");
 			System.exit(0);
@@ -685,12 +869,12 @@ public class Interpreter {
 		nextBlock[0] = nextRow;
 		nextBlock[1] = nextCol;
 		System.out.println("Continuing from " + nextBlock[0] + ", " + nextBlock[1]);
-//		try {
-//			TimeUnit.SECONDS.sleep(1);
-//		} catch (InterruptedException e) {
+		try {
+			TimeUnit.SECONDS.sleep(3);
+		} catch (InterruptedException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
-//		}
+		}
 		
 		String curVal = c.colorVal;
 
