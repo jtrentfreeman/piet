@@ -26,7 +26,7 @@ class Codel
 		System.out.println("\tCodel size: " + this.size);
 		System.out.println("\tCodel color value: " + this.colorVal);
 		System.out.println("\tCodel color: " + this.colorName);
-//		System.out.println("Codel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
+		System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
 //		System.out.println("Codel's right-most & lower-most block is at " + this.rightBottom[0] + ", " + this.rightBottom[1]);
 //		System.out.println("Codel's bottom-most & right-most block is at " + this.bottomRight[0] + ", " + this.bottomRight[1]);
 //		System.out.println("Codel's bottom-most & left-most block is at " + this.bottomLeft[0] + ", " + this.bottomLeft[1]);

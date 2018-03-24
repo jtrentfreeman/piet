@@ -15,213 +15,147 @@ public class Interpreter {
 	private static Stack<Integer> stack = new Stack<Integer>();
 	
 	private static int lastRotate = 0;
+	private static boolean end = false;
+	private static boolean clearQ = false;
 
 	// Takes in a .ppm file as an argument, and runs it as a Piet program
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws IOException
 	{
-				
-		File oldfile = new File("nhello.ppm");
+			
+		// input file is passed in as an argument, guess it could be passed in without the .extension
+		File oldfile = new File(args[0]);
 		String firstBit = oldfile.getName().split("\\.")[0];
 		File newfile = new File(firstBit + ".txt");
+		
+		// here we're renaming it in order to get the colors as an RGB trio
 		oldfile.renameTo(newfile);
-//		System.out.println(newfile);
-
+		
+		// passing in the file name to get parsed
 		convertFile(newfile.getName());
 		
 		String[][] board = readFile("tmp.txt");
 
-//		System.out.println(board[0][0]);
-		
-		int[] f = {0, 0};
-		int[] g = {0, 1};
-//		Codel cod1 = new Codel(f, board);
-//		Codel cod2 = new Codel(g, board);
-
+		// performing the actual file 
 		readBoard(board);
-//		System.out.println();
 		
-//		newfile.renameTo(oldfile);
+		// want our original file back
+		File endfile = new File(firstBit + ".ppm");
+		newfile.renameTo(endfile);
 	}
 	
+	// takes in a .txt file and converts the colors into my specified format
 	public static void convertFile(String s) throws IOException, FileNotFoundException
 	{
 		File in = new File(s);
 		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
 		Scanner sc = new Scanner(in);
-		int numCol, numRow;
 		
-		sc.nextLine(); sc.nextLine(); 
-		String tmp = sc.nextLine();
-//		System.out.println(tmp);
-		String[] colrow = tmp.split("\\s");
-//		System.out.println(colrow[0]);
+		// skipping the first few lines
+//		sc.nextLine(); // the .ppm title
+	
+//		String newLine = sc.nextLine();
 		
-		numCol = Integer.parseInt(colrow[0]); 
-		numRow = Integer.parseInt(colrow[1]);
-		sc.nextLine();
+		// ignoring the comments
+//		if(newLine.contains("#")) 
+////		System.out.println(sc.nextLine()); 
+//			newLine = sc.nextLine();
+//		else
+//			newLine = newLine;
 		
-		BufferedWriter bw = new BufferedWriter(new FileWriter(in, true));
-//		System.out.println(in.getAbsolutePath());
-		String appendThis = "";
-		for(int i = 0; i < numCol*numRow; i++)
+		String[] threeLines = new String[3];
+
+//		sc.nextLine();
+		String newLine = "";
+		int firstThreeLines = 0;
+		while(firstThreeLines < 3)
 		{
-//			System.out.println("Getting number " + i);
-			if(i % numRow == 0 && i != 0)
-			{
-//				System.out.println("new line");
+			newLine = sc.nextLine();
+			if(newLine.contains("#"))
+				newLine = sc.nextLine();
+			
+			threeLines[firstThreeLines] = newLine;
+			firstThreeLines++;
+			
+		}
+		
+//		System.out.println(threeLines[0] + "\n" + threeLines[1] + "\n" + threeLines[2]);
+		String[] colrow = threeLines[1].split("\\s");
+		totCol = Integer.parseInt(colrow[0]);
+		totRow = Integer.parseInt(colrow[1]);
+		
+		String appendThis = "";
+		for(int i = 0; i < totCol*totRow; i++)
+		{
+			if(i % totCol == 0 && i != 0)
 				appendThis += "\n";
-//				System.out.println("So far:\n" + appendThis);
-			}
+
 			int r, g, b;
 			r = sc.nextInt();
 			g = sc.nextInt();
 			b = sc.nextInt();
-//			System.out.print(r + " "+ g + " " + b + "\t\t");
 			
 			if(r == 0x00)
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "00 ";
-//						System.out.println("Black");
-					}
-					else if(b == 0xC0)
-					{
-						appendThis += "52 ";
-//						System.out.println("Dark Blue");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "51 ";
-//						System.out.println("Blue");
-					}
+					if(b == 0x00)		appendThis += "00 ";
+					else if(b == 0xC0)	appendThis += "52 ";
+					else if(b == 0xFF)	appendThis += "51 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "32 ";
-//						System.out.println("Dark Green");
-					}
-					else if(b == 0xC0)
-					{
-						appendThis += "32 ";
-//						System.out.println("Dark Green");
-					}
+					if(b == 0x00)		appendThis += "32 ";
+					else if(b == 0xC0)	appendThis += "42 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "31 ";
-//						System.out.println("Green");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "41 ";
-//						System.out.println("Cyan");
-					}
+					if(b == 0x00)		appendThis += "31 ";
+					else if(b == 0xFF)	appendThis += "41 ";
 				}
 			}
 			else if(r == 0xC0)
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "12 ";
-//						System.out.println("Dark Red");
-					}
-					else if(b == 0xC0)
-					{
-						appendThis += "62 ";
-//						System.out.println("Dark Magenta");
-					}
+					if(b == 0x00)		appendThis += "12 ";
+					else if(b == 0xC0)	appendThis += "62 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "22 ";
-//						System.out.println("Dark Yellow");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "50 ";
-//						System.out.println("Light Blue");
-					}
+					if(b == 0x00)		appendThis += "22 ";
+					else if(b == 0xFF)	appendThis += "50 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0xC0)
-					{
-						appendThis += "30 ";
-//						System.out.println("Light Green");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "40 ";
-//						System.out.println("Light Cyan");
-					}
+					if(b == 0xC0)		appendThis += "30 ";
+					else if(b == 0xFF)	appendThis += "40 ";
 				}
 			}
 			else if(r == 0xFF)
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "11 ";
-//						System.out.println("Red");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "61 ";
-//						System.out.println("Magenta");
-					}
+					if(b == 0x00)		appendThis += "11 ";
+					else if(b == 0xFF)	appendThis += "61 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0xC0)
-					{
-						appendThis += "10 ";
-//						System.out.println("Light Red");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "60 ";
-//						System.out.println("Light Magenta");
-					}
+					if(b == 0xC0)		appendThis += "10 ";
+					else if(b == 0xFF)	appendThis += "60 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0x00)
-					{
-						appendThis += "21 ";
-//						System.out.println("Yellow");
-					}
-					else if(b == 0xC0)
-					{
-						appendThis += "20 ";
-//						System.out.println("Light Yellow");
-					}
-					else if(b == 0xFF)
-					{
-						appendThis += "01 ";
-//						System.out.println("White");
-					}
+					if(b == 0x00)		appendThis += "21 ";
+					else if(b == 0xC0)	appendThis += "20 ";
+					else if(b == 0xFF)	appendThis += "01 ";
 				}
 			}			
 		}
 		
-//		System.out.println("here");
-//		System.out.println(appendThis);
-//		bw.write(appendThis);
 		writer.print(appendThis);
 		writer.close();
+		sc.close();
 		
 	}
 	
@@ -230,24 +164,8 @@ public class Interpreter {
 	{
 		
 		File infile = new File(s);
-		Scanner infileS = new Scanner(infile);
-//		System.out.println(infileS.nextLine());
-
-		Scanner s1 = new Scanner(infile);
+		
 		Scanner s2 = new Scanner(infile);
-
-		String readLines;
-
-		totRow = 0;
-		totCol = 0;
-		while(s1.hasNextLine())
-		{
-			readLines = s1.nextLine();
-			if(readLines.trim().isEmpty())
-				break;
-
-			totRow++;
-		}
 
 		String[] wholeLine = new String[totRow];
 		for(int i = 0; i < totRow; i++)
@@ -268,7 +186,6 @@ public class Interpreter {
 			}
 		}
 
-		s1.close();
 		s2.close();
 
 		return board;
@@ -293,11 +210,9 @@ public class Interpreter {
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
 		codels[0].size = initSize;
-		
 		codels[0].printCodel();
-
+		
 		// the program will end on it's own (hypothetically)
-		boolean end = false;
 		while(!end)
 		{
 			// get the coords of the next Codel
@@ -311,68 +226,74 @@ public class Interpreter {
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
 			codels[1].size = initSize;
-			codels[1].printCodel();
+			
+			if(codels[1].colorName.equals("white"))
+			{
+				System.out.println("one is white\n\n\n");
+				System.out.println("dp: " + dp);
+				codels[0] = codels[1];
+				continue;
+			}
 			
 			// perform the command given by the two Codel's
-			getCommand(codels[0], codels[1]);
+			System.out.println();
+			codels[1].printCodel();
 
+			System.out.println("Computing command for blocks: " + codels[0].colorName + " and " + codels[1].colorName);
+			getCommand(codels[0], codels[1]);
+			
 			// shift the new Codel to the old one's spot
 			codels[0] = codels[1];
-			
+						
 			// if I want to print the stack for debuggin
 			System.out.println(Arrays.toString(stack.toArray()));
 			
 		}
+		
+		System.out.println("guess we're done here");
+		
 	}
-
-	// get the size of the codel being input
+	
 	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int a, int b)
 	{
-		// this codel is uninitiated
 		if(c.rightTop[0] == -1)
 		{
 			setCorners(c, a, b);
 		}
-		
-		visited[a][b] = true;
-
-		int[][] moves = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
-		int newA = 0, newB = 0;
 		int count = 0;
+		visited[a][b] = true;
 		
-		// moving in 4 cardinal directions
-		for(int m = 0; m < 4; m++)
+		int[] left = {a, b-1};
+		int[] right = {a, b+1};
+		int[] up = {a-1, b};
+		int[] down = {a+1, b};
+		int[] newCoords = {-1, -1};
+		for(int i = 0; i < 4; i++)
 		{
-			newA = a + moves[m][0];
-			newB = b + moves[m][1];
-
-			// skip this direction if out of bounds
-			if(!inBounds(newA, newB))
-				continue;
-
-			// skip this direction if already visited
-			if(visited[newA][newB])
-				continue;
+			if(i == 0)
+				newCoords = left;
+			else if(i == 1)
+				newCoords = right;
+			else if(i == 2)
+				newCoords = up;
+			else if(i == 3)
+				newCoords = down;
 			
-			visited[newA][newB] = true;
-			
-			String s1 = c.colorVal;
-			String s2 = board[newA][newB];
-			
-			if(!s1.equals(s2))
+			if(!inBounds(newCoords[0], newCoords[1]))
 				continue;
 			
-			setCorners(c, newA, newB);
+			if(visited[newCoords[0]][newCoords[1]])
+				continue;
+						
+			if(Integer.parseInt(board[newCoords[0]][newCoords[1]]) == Integer.parseInt(c.colorVal))
+			{
+				count++;
+				count += findSizeCodel(board, visited, c, newCoords[0], newCoords[1]);
+				setCorners(c, newCoords[0], newCoords[1]);
+			}
 			
-			count++;
-			int num = findSizeCodel(board, visited, c, newA, newB);
-			count += num;
 		}
 		
-//		c.printYesBoard(totRow, totCol);
-		if(inBounds(newA, newB))
-			return count + findSizeCodel(board, visited, c, newA, newB);
-
 		return count;
 	}
 
@@ -382,7 +303,13 @@ public class Interpreter {
 
 		String col1 = cod1.colorVal;
 		String col2 = cod2.colorVal;
-
+		
+		if(Integer.parseInt(cod1.colorVal) == 1 || Integer.parseInt(cod1.colorVal) == 1)
+		{	
+			clearQ = true;
+			return;
+		}
+		
 		int hueChange = Character.getNumericValue(col2.charAt(0)) - Character.getNumericValue(col1.charAt(0));
 		int lightChange = Character.getNumericValue(col2.charAt(1)) - Character.getNumericValue(col1.charAt(1));
 
@@ -390,15 +317,9 @@ public class Interpreter {
 			hueChange += 6;
 		if(lightChange < 0)
 			lightChange += 3;
-		
-//		lightChange = correctMod(lightChange, 3);
-//		hueChange = correctMod(lightChange, 6);
-		
+				
 		int val1, val2;
 		
-		System.out.println("hue: " + hueChange);
-		System.out.println("light: " + lightChange);
-
 	try {
 		switch(hueChange)
 		{
@@ -408,7 +329,7 @@ public class Interpreter {
 					case 0:
 						return;
 					case 1:	// push
-//						System.out.println("pushing " + cod1.size);
+						System.out.println("pushing " + cod1.size);
 						stack.push(cod1.size);
 //						System.out.println(cod1.size);
 						return;
@@ -422,19 +343,19 @@ public class Interpreter {
 				switch(lightChange)
 				{
 					case 0: // add 
-//						System.out.println("add");
+						System.out.println("add");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(val1 + val2);
 						return;
 					case 1: // subtract
-//						System.out.println("sub");
+						System.out.println("sub");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(val1 - val2);
 						return;
 					case 2: // multiply
-//						System.out.println("multiply");
+						System.out.println("multiply");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(val1 * val2);
@@ -444,16 +365,19 @@ public class Interpreter {
 				switch(lightChange)
 				{
 					case 0: // divide
+						System.out.println("divide");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(val1 / val2);
 						return;
 					case 1: // mod 
+						System.out.println("mod");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						stack.push(correctMod(val1, val2));
 						return;
 					case 2: // not
+						System.out.println("not");
 						val2 = stack.pop();
 						if(val2 == 0)
 							stack.push(1);
@@ -465,6 +389,7 @@ public class Interpreter {
 				switch(lightChange)
 				{
 					case 0: // greater
+						System.out.println("greater");
 						val2 = stack.pop();
 						val1 = stack.pop();
 						if(val1 > val2)
@@ -473,10 +398,12 @@ public class Interpreter {
 							stack.push(0);
 						return;
 					case 1: // pointer
+						System.out.println("pointer");
 						val2 = stack.pop();
 						rotateDP(val2);
 						return;
 					case 2: // switch
+						System.out.println("switch");
 						val2 = stack.pop();
 						rotateCC(val2);
 						return;
@@ -485,11 +412,13 @@ public class Interpreter {
 				switch(lightChange)
 				{
 					case 0:	// duplicate
+						System.out.println("duplicate");
 						val2 = stack.pop();
 						stack.push(val2);
 						stack.push(val2);
 						return;
 					case 1: // roll
+						System.out.println("roll");
 						int size = stack.size();
 						val2 = stack.pop();
 						val1 = stack.pop();
@@ -528,10 +457,10 @@ public class Interpreter {
 						System.out.print(k);
 						return;
 					case 2: // outChar
-//						System.out.println("out char");
+						System.out.println("out char");
 						int l = stack.pop();
 						char m = (char) l;
-						System.out.println(m);
+						System.out.print(m);
 						return;
 				}
 		}
@@ -551,14 +480,12 @@ public class Interpreter {
 			// if further right
 			if(newY > c.rightTop[1] || c.rightTop[1] == -1) 
 			{
-//				System.out.println("new right-most column");
 				c.rightTop[1] = newY;
 				c.rightTop[0] = newX;
 			}
 			// if further up
 			if(newX < c.rightTop[0] || c.rightTop[0] == -1)
 			{
-//				System.out.println("new right-most row");
 				c.rightTop[1] = newY;
 				c.rightTop[0] = newX;
 			}
@@ -582,14 +509,12 @@ public class Interpreter {
 			// if further down
 			if(newX > c.bottomRight[0] || c.bottomRight[0] == -1)
 			{
-//				System.out.println("new bottom-most row");
 				c.bottomRight[0] = newX;
 				c.bottomRight[1] = newY;
 			}
 			// if further right
 			if(newY > c.bottomRight[1] || c.bottomRight[1] == -1)
 			{
-//				System.out.println("new bottom-most column");
 				c.bottomRight[1] = newY;
 				c.bottomRight[0] = newX;
 			}
@@ -613,14 +538,12 @@ public class Interpreter {
 			// if further left
 			if(newY < c.leftBottom[1] || c.leftBottom[1] == -1)
 			{
-//				System.out.println("new left-most column");
 				c.leftBottom[1] = newY;
 				c.leftBottom[0] = newX;
 			}
 			// if further down
 			if(newX > c.leftBottom[0] || c.leftBottom[0] == -1)
 			{
-//				System.out.println("new left-most row");
 				c.leftBottom[1] = newY;
 				c.leftBottom[0] = newX;
 			}
@@ -644,14 +567,12 @@ public class Interpreter {
 			// if further up
 			if(newX < c.topLeft[0] || c.topLeft[0] == -1)
 			{
-//				System.out.println("new top-most row");
 				c.topLeft[0] = newX;
 				c.topLeft[1] = newY;
 			}	
 			// if further left
 			if(newY < c.topLeft[1] || c.topLeft[1] == -1)
 			{
-//				System.out.println("new top-most column");
 				c.topLeft[1] = newY;
 				c.topLeft[0] = newX;
 			}
@@ -686,6 +607,7 @@ public class Interpreter {
 		return dividend % divisor;
 	}
 	
+	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int	
 	public static void rotateDP(int val)
 	{
 		lastRotate = 0;
@@ -724,6 +646,7 @@ public class Interpreter {
 		}
 	}
 	
+	// If rotateDP gets its own method then so does rotateCC
 	public static void rotateCC(int val)
 	{
 		lastRotate = 1;
@@ -737,21 +660,20 @@ public class Interpreter {
 	}
 	
 	// we're getting the newest codel, from the old one, c
+	// Still don't know exactly how exiting works, gonna work on that
 	public static int[] getNextBlock(String[][] board, Codel c, int attempt)
 	{
 		
 		int nextBlock[] = new int[2];
-//		c.printCodel();
-		
+
 		// we've tried every orientation and can't find a new Codel
-		if(attempt > 6)
+		if(attempt > 8)
 		{
 			System.out.println("DONE");
-			System.exit(0);
+			int[] fin = {0, 0};
+			end = true;
+			return fin;
 		}
-//		System.out.println("Attempt: " + attempt);
-		
-//		System.out.println("DP: " + dp + "   CC: " + cc);
 		
 		int nextRow = 0, nextCol = 0;
 		switch(dp)
@@ -773,8 +695,8 @@ public class Interpreter {
 				}
 				nextCol++;
 				
-				// theoretical, do this for all dp directions
-				// just moves through white space
+////				 theoretical, do this for all dp directions
+////				 just moves through white space
 //				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
 //				{
 //					nextCol++;
@@ -802,8 +724,11 @@ public class Interpreter {
 						nextCol = c.bottomLeft[1];
 						break;
 				}
-//				System.out.println("Starting at " + nextRow + ", " + nextCol);
 				nextRow++;
+//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+//				{
+//					nextRow++;
+//				}
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -827,8 +752,11 @@ public class Interpreter {
 						nextCol = c.leftTop[1];
 						break;
 				}
-//				System.out.println("Starting at " + nextRow + ", " + nextCol);
 				nextCol--;
+//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+//				{
+//					nextCol--;
+//				}
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -852,8 +780,11 @@ public class Interpreter {
 						nextCol = c.topRight[1];
 						break;
 				}
-//				System.out.println("Starting at " + nextRow + ", " + nextCol);
 				nextRow--;
+//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+//				{
+//					nextRow--;
+//				}
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -868,17 +799,7 @@ public class Interpreter {
 
 		nextBlock[0] = nextRow;
 		nextBlock[1] = nextCol;
-		System.out.println("Continuing from " + nextBlock[0] + ", " + nextBlock[1]);
-		try {
-			TimeUnit.SECONDS.sleep(3);
-		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-		}
-		
-		String curVal = c.colorVal;
 
-		System.out.println("Returning");
 		return nextBlock;
 	}
 }
