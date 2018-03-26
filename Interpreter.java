@@ -19,7 +19,7 @@ public class Interpreter {
 	public static void main(String[] args) throws IOException
 	{
 		// input file is passed in as an argument, guess it could be passed in without the .extension
-		File oldfile = new File("loop.ppm");
+		File oldfile = new File(args[0]);
 		String firstBit = oldfile.getName().split("\\.")[0];
 		File newfile = new File(firstBit + ".txt");
 		
