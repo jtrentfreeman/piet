@@ -2,8 +2,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-
 public class Interpreter {
 
 	private static int totRow;		// total number of rows
@@ -14,17 +12,14 @@ public class Interpreter {
 	
 	private static Stack<Integer> stack = new Stack<Integer>();
 	
-	private static int lastRotate = 0;
 	private static boolean end = false;
-	private static boolean clearQ = false;
-
+	
 	// Takes in a .ppm file as an argument, and runs it as a Piet program
 	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
 	public static void main(String[] args) throws IOException
 	{
-			
 		// input file is passed in as an argument, guess it could be passed in without the .extension
-		File oldfile = new File(args[0]);
+		File oldfile = new File("loop.ppm");
 		String firstBit = oldfile.getName().split("\\.")[0];
 		File newfile = new File(firstBit + ".txt");
 		
@@ -34,7 +29,7 @@ public class Interpreter {
 		// passing in the file name to get parsed
 		convertFile(newfile.getName());
 		
-		String[][] board = readFile("tmp.txt");
+		String[][] board = fileToBoard("tmp.txt");
 
 		// performing the actual file 
 		readBoard(board);
@@ -42,49 +37,45 @@ public class Interpreter {
 		// want our original file back
 		File endfile = new File(firstBit + ".ppm");
 		newfile.renameTo(endfile);
+		
+		
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(300);
+//		} catch (InterruptedException e) {
+//
+//			e.printStackTrace();
+//		}
 	}
 	
 	// takes in a .txt file and converts the colors into my specified format
+	// eventually I might omit comments from the hex values too, but right now comments can only exist in the header
 	public static void convertFile(String s) throws IOException, FileNotFoundException
 	{
 		File in = new File(s);
 		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
 		Scanner sc = new Scanner(in);
 		
-		// skipping the first few lines
-//		sc.nextLine(); // the .ppm title
-	
-//		String newLine = sc.nextLine();
-		
-		// ignoring the comments
-//		if(newLine.contains("#")) 
-////		System.out.println(sc.nextLine()); 
-//			newLine = sc.nextLine();
-//		else
-//			newLine = newLine;
-		
+		// skipping the first 3 lines (these contain file information)
 		String[] threeLines = new String[3];
-
-//		sc.nextLine();
 		String newLine = "";
 		int firstThreeLines = 0;
 		while(firstThreeLines < 3)
 		{
 			newLine = sc.nextLine();
-			if(newLine.contains("#"))
+			while(newLine.contains("#"))
 				newLine = sc.nextLine();
 			
 			threeLines[firstThreeLines] = newLine;
 			firstThreeLines++;
-			
 		}
 		
-//		System.out.println(threeLines[0] + "\n" + threeLines[1] + "\n" + threeLines[2]);
 		String[] colrow = threeLines[1].split("\\s");
 		totCol = Integer.parseInt(colrow[0]);
 		totRow = Integer.parseInt(colrow[1]);
 		
 		String appendThis = "";
+		
+		// getting all the colors, number crunching
 		for(int i = 0; i < totCol*totRow; i++)
 		{
 			if(i % totCol == 0 && i != 0)
@@ -155,16 +146,14 @@ public class Interpreter {
 		
 		writer.print(appendThis);
 		writer.close();
-		sc.close();
-		
+		sc.close();	
 	}
 	
 	// reading in the file and returning it as a 2d string array
-	public static String[][] readFile(String s) throws FileNotFoundException
+	public static String[][] fileToBoard(String s) throws FileNotFoundException
 	{
 		
 		File infile = new File(s);
-		
 		Scanner s2 = new Scanner(infile);
 
 		String[] wholeLine = new String[totRow];
@@ -174,7 +163,6 @@ public class Interpreter {
 			String[] brokenLine = wholeLine[i].split(" ");
 			totCol = (totCol > brokenLine.length) ? totCol : brokenLine.length;
 		}
-
 
 		String[][] board = new String[totRow][totCol];
 		for(int i = 0; i < totRow; i++)
@@ -194,7 +182,6 @@ public class Interpreter {
 	// by now we've read in the file and pass it in as board
 	public static void readBoard(String[][] board)
 	{
-
 		boolean[][] visited = new boolean[totRow][totCol];
 		for(int i = 0; i < totRow; i++)
 			for(int j = 0; j < totCol; j++)
@@ -210,7 +197,6 @@ public class Interpreter {
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
 		codels[0].size = initSize;
-		codels[0].printCodel();
 		
 		// the program will end on it's own (hypothetically)
 		while(!end)
@@ -227,58 +213,53 @@ public class Interpreter {
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
 			codels[1].size = initSize;
 			
+			// white codels act as a nop, meaning they don't go into the queue at all
 			if(codels[1].colorName.equals("white"))
 			{
-				System.out.println("one is white\n\n\n");
-				System.out.println("dp: " + dp);
-				codels[0] = codels[1];
-				continue;
+				int[] nextNonWhite = getNextBlockWhite(board, codels[1], g[0], g[1], 0);
+				codels[0] = new Codel(nextNonWhite, board);
+				codels[0].size = 1+findSizeCodel(board, visited, codels[0], nextNonWhite[0], nextNonWhite[1]);
 			}
-			
-			// perform the command given by the two Codel's
-			System.out.println();
-			codels[1].printCodel();
-
-			System.out.println("Computing command for blocks: " + codels[0].colorName + " and " + codels[1].colorName);
-			getCommand(codels[0], codels[1]);
-			
-			// shift the new Codel to the old one's spot
-			codels[0] = codels[1];
-						
-			// if I want to print the stack for debuggin
-			System.out.println(Arrays.toString(stack.toArray()));
-			
+			else
+			{
+				// perform the command given by the two Codel's
+				getCommand(codels[0], codels[1]);
+				
+				// shift the new Codel to the old one's spot
+				codels[0] = codels[1];
+							
+				// if I want to print the stack for debuggin
+//				System.out.println(Arrays.toString(stack.toArray()));
+			}
 		}
-		
-		System.out.println("guess we're done here");
-		
 	}
 	
+	//
 	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int a, int b)
 	{
+		// codel is uninitiated, so I need to set its corners
 		if(c.rightTop[0] == -1)
 		{
 			setCorners(c, a, b);
 		}
+		
 		int count = 0;
 		visited[a][b] = true;
 		
-		int[] left = {a, b-1};
-		int[] right = {a, b+1};
-		int[] up = {a-1, b};
-		int[] down = {a+1, b};
+		// 4 directions the program will search in for more of the same color
 		int[] newCoords = {-1, -1};
 		for(int i = 0; i < 4; i++)
 		{
 			if(i == 0)
-				newCoords = left;
+				newCoords = new int[]{a, b-1};
 			else if(i == 1)
-				newCoords = right;
+				newCoords = new int[] {a, b+1};
 			else if(i == 2)
-				newCoords = up;
+				newCoords = new int[] {a-1, b};
 			else if(i == 3)
-				newCoords = down;
+				newCoords = new int[] {a+1, b};
 			
+			// gonna skip this block if it's out of the board or visited
 			if(!inBounds(newCoords[0], newCoords[1]))
 				continue;
 			
@@ -291,7 +272,6 @@ public class Interpreter {
 				count += findSizeCodel(board, visited, c, newCoords[0], newCoords[1]);
 				setCorners(c, newCoords[0], newCoords[1]);
 			}
-			
 		}
 		
 		return count;
@@ -306,10 +286,10 @@ public class Interpreter {
 		
 		if(Integer.parseInt(cod1.colorVal) == 1 || Integer.parseInt(cod1.colorVal) == 1)
 		{	
-			clearQ = true;
 			return;
 		}
 		
+		// specific color doesn't matter, it's about the positive net change between two colors
 		int hueChange = Character.getNumericValue(col2.charAt(0)) - Character.getNumericValue(col1.charAt(0));
 		int lightChange = Character.getNumericValue(col2.charAt(1)) - Character.getNumericValue(col1.charAt(1));
 
@@ -318,161 +298,161 @@ public class Interpreter {
 		if(lightChange < 0)
 			lightChange += 3;
 				
+		// max of 2 values being popped
 		int val1, val2;
 		
-	try {
-		switch(hueChange)
-		{
-			case 0:
-				switch(lightChange)
-				{
-					case 0:
-						return;
-					case 1:	// push
-						System.out.println("pushing " + cod1.size);
-						stack.push(cod1.size);
-//						System.out.println(cod1.size);
-						return;
-					case 2: // pop
-						System.out.println("pop");
-						stack.pop();
-						
-						return;
-				}
-			case 1:
-				switch(lightChange)
-				{
-					case 0: // add 
-						System.out.println("add");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						stack.push(val1 + val2);
-						return;
-					case 1: // subtract
-						System.out.println("sub");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						stack.push(val1 - val2);
-						return;
-					case 2: // multiply
-						System.out.println("multiply");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						stack.push(val1 * val2);
-						return;
-				}
-			case 2:
-				switch(lightChange)
-				{
-					case 0: // divide
-						System.out.println("divide");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						stack.push(val1 / val2);
-						return;
-					case 1: // mod 
-						System.out.println("mod");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						stack.push(correctMod(val1, val2));
-						return;
-					case 2: // not
-						System.out.println("not");
-						val2 = stack.pop();
-						if(val2 == 0)
-							stack.push(1);
-						else
-							stack.push(0);
-						return;
-				}
-			case 3:
-				switch(lightChange)
-				{
-					case 0: // greater
-						System.out.println("greater");
-						val2 = stack.pop();
-						val1 = stack.pop();
-						if(val1 > val2)
-							stack.push(1);
-						else
-							stack.push(0);
-						return;
-					case 1: // pointer
-						System.out.println("pointer");
-						val2 = stack.pop();
-						rotateDP(val2);
-						return;
-					case 2: // switch
-						System.out.println("switch");
-						val2 = stack.pop();
-						rotateCC(val2);
-						return;
-				}
-			case 4:
-				switch(lightChange)
-				{
-					case 0:	// duplicate
-						System.out.println("duplicate");
-						val2 = stack.pop();
-						stack.push(val2);
-						stack.push(val2);
-						return;
-					case 1: // roll
-						System.out.println("roll");
-						int size = stack.size();
-						val2 = stack.pop();
-						val1 = stack.pop();
-						while(val2 > 0)
-						{
-							int rollNum = stack.pop();
-							int[] vals = new int[size];
-							for(int i = 0; i < val1; i++)
-								vals[i] = stack.pop();
-							stack.push(rollNum);
-							for(int i = val1 - 1; i >= 0; i--)
-								stack.push(vals[i]);
-							val2--;
-						}
-						return;
-					case 2: // inNum
-						System.out.println("in num");
-						Scanner s = new Scanner(System.in);
-						int i = s.nextInt();
-						stack.push(i);
-						return;
-				}
-			case 5:
-				switch(lightChange)
-				{
-					case 0: // inChar
-						System.out.println("in char");
-						Scanner s = new Scanner(System.in);
-						char i = s.next().charAt(0);
-						int j = i;
-						stack.push(j);
-						return;
-					case 1: // outNum
-						System.out.println("out num");
-						int k = stack.pop();
-						System.out.print(k);
-						return;
-					case 2: // outChar
-						System.out.println("out char");
-						int l = stack.pop();
-						char m = (char) l;
-						System.out.print(m);
-						return;
-				}
-		}
-	} catch(EmptyStackException e) {	}
+		try {
+			switch(hueChange)
+			{
+				case 0:
+					switch(lightChange)
+					{
+						case 0:
+							return;
+						case 1:	// push
+//							System.out.println("pushing " + cod1.size);
+							stack.push(cod1.size);
+//							System.out.println(cod1.size);
+							return;
+						case 2: // pop
+//							System.out.println("pop");
+							stack.pop();
+							
+							return;
+					}
+				case 1:
+					switch(lightChange)
+					{
+						case 0: // add 
+//							System.out.println("add");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							stack.push(val1 + val2);
+							return;
+						case 1: // subtract
+//							System.out.println("sub");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							stack.push(val1 - val2);
+							return;
+						case 2: // multiply
+//							System.out.println("multiply");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							stack.push(val1 * val2);
+							return;
+					}
+				case 2:
+					switch(lightChange)
+					{
+						case 0: // divide
+//							System.out.println("divide");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							stack.push(val1 / val2);
+							return;
+						case 1: // mod 
+//							System.out.println("mod");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							stack.push(correctMod(val1, val2));
+							return;
+						case 2: // not
+//							System.out.println("not");
+							val2 = stack.pop();
+							if(val2 == 0)
+								stack.push(1);
+							else
+								stack.push(0);
+							return;
+					}
+				case 3:
+					switch(lightChange)
+					{
+						case 0: // greater
+//							System.out.println("greater");
+							val2 = stack.pop();
+							val1 = stack.pop();
+							if(val1 > val2)
+								stack.push(1);
+							else
+								stack.push(0);
+							return;
+						case 1: // pointer
+//							System.out.println("pointer");
+							val2 = stack.pop();
+							rotateDP(val2);
+							return;
+						case 2: // switch
+//							System.out.println("switch");
+							val2 = stack.pop();
+							rotateCC(val2);
+							return;
+					}
+				case 4:
+					switch(lightChange)
+					{
+						case 0:	// duplicate
+//							System.out.println("duplicate");
+							val2 = stack.pop();
+							stack.push(val2);
+							stack.push(val2);
+							return;
+						case 1: // roll
+//							System.out.println("roll");
+							int size = stack.size();
+							val2 = stack.pop();
+							val1 = stack.pop();
+							while(val2 > 0)
+							{
+								int rollNum = stack.pop();
+								int[] vals = new int[size];
+								for(int i = 0; i < val1; i++)
+									vals[i] = stack.pop();
+								stack.push(rollNum);
+								for(int i = val1 - 1; i >= 0; i--)
+									stack.push(vals[i]);
+								val2--;
+							}
+							return;
+						case 2: // inNum
+//							System.out.println("in num");
+							Scanner s = new Scanner(System.in);
+							int i = s.nextInt();
+							stack.push(i);
+							return;
+					}
+				case 5:
+					switch(lightChange)
+					{
+						case 0: // inChar
+//							System.out.println("in char");
+							Scanner s = new Scanner(System.in);
+							char i = s.next().charAt(0);
+							int j = i;
+							stack.push(j);
+							return;
+						case 1: // outNum
+//							System.out.println("out num");
+							int k = stack.pop();
+							System.out.print(k);
+							return;
+						case 2: // outChar
+//							System.out.println("out char");
+							int l = stack.pop();
+							char m = (char) l;
+							System.out.print(m);
+							return;
+					}
+			}
+		} catch(EmptyStackException e) {	}
 	
 		return;
 	}
 	
-	// newX = row [0], newY = column [1]
+	// Piet relies entirely on moving from a corner to a new color, need to set two corners (l, r) for each direction (l, r, u, d)
 	public static void setCorners(Codel c, int newX, int newY)
 	{
-//		System.out.println("Testing new corner at " + newX + ", " + newY);
 		
 		// potential for new right column value
 		if(newY >= c.rightTop[1] || c.rightTop[1] == -1)
@@ -610,7 +590,6 @@ public class Interpreter {
 	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int	
 	public static void rotateDP(int val)
 	{
-		lastRotate = 0;
 		if(val == 0)
 			return;
 		
@@ -649,7 +628,6 @@ public class Interpreter {
 	// If rotateDP gets its own method then so does rotateCC
 	public static void rotateCC(int val)
 	{
-		lastRotate = 1;
 		if(correctMod(val, 2) == 2)
 			return;
 		else
@@ -659,8 +637,96 @@ public class Interpreter {
 				cc = "right";
 	}
 	
+	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
+	public static int[] getNextBlockWhite(String[][] board, Codel c,int row, int col, int attempt )
+	{
+		int[] nextBlock = new int[2];
+		int nextRow = row;
+		int nextCol = col;
+
+		
+		// moving in a straight line, unless it goes out of bounds or hits a black box
+		switch(dp)
+		{
+			case "right":
+				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+				{
+//					System.out.println("new val is " + board[nextRow][nextCol] + " at " + nextRow + " " + nextCol);
+					if(!inBounds(nextRow, nextCol+1))
+					{
+						rotateDP(1);
+						return getNextBlockWhite(board, c, attempt, row, col);
+					}
+					else if(Integer.parseInt(board[nextRow][nextCol+1]) == 0)
+					{
+						rotateDP(1);
+//						System.out.println("found a black block at " + nextRow + " " + (nextCol+1) + "\tDP is now " + dp);
+						int[] tmp = {nextRow, nextCol};
+						return tmp;
+					}
+						
+					nextCol++;
+				}
+				break;
+			case "left":
+				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+				{
+					if(!inBounds(nextRow, nextCol-1))
+					{
+						rotateDP(1);
+						return getNextBlockWhite(board, c, attempt, row, col);
+					}
+					else if(Integer.parseInt(board[nextRow][nextCol-1]) == 0)
+					{
+						rotateDP(1);
+						int[] tmp = {nextRow, nextCol};
+						return tmp;
+					}
+					nextCol--;
+				}
+				break;
+			case "down":
+				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+				{
+					if(!inBounds(nextRow+1, nextCol))
+					{
+						rotateDP(1);
+						return getNextBlockWhite(board, c, attempt, row, col);
+					}
+					else if(Integer.parseInt(board[nextRow+1][nextCol]) == 0)
+					{
+						rotateDP(1);
+						int[] tmp = {nextRow, nextCol};
+						return tmp;
+					}
+					nextRow++;
+				}
+				break;
+			case "up":
+				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
+				{
+					if(!inBounds(nextRow-1, nextCol))
+					{
+						rotateDP(1);
+						return getNextBlockWhite(board, c, attempt, row, col);
+					}
+					else if(Integer.parseInt(board[nextRow-1][nextCol]) == 0)
+					{
+						rotateDP(1);
+						int[] tmp = {nextRow, nextCol};
+						return tmp;
+					}
+					nextRow--;
+				}
+				break;
+		}
+		
+		nextBlock[0] = nextRow;
+		nextBlock[1] = nextCol;
+		return nextBlock;
+	}
+	
 	// we're getting the newest codel, from the old one, c
-	// Still don't know exactly how exiting works, gonna work on that
 	public static int[] getNextBlock(String[][] board, Codel c, int attempt)
 	{
 		
@@ -669,7 +735,7 @@ public class Interpreter {
 		// we've tried every orientation and can't find a new Codel
 		if(attempt > 8)
 		{
-			System.out.println("DONE");
+//			System.out.println("DONE");
 			int[] fin = {0, 0};
 			end = true;
 			return fin;
@@ -695,12 +761,6 @@ public class Interpreter {
 				}
 				nextCol++;
 				
-////				 theoretical, do this for all dp directions
-////				 just moves through white space
-//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
-//				{
-//					nextCol++;
-//				}
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -725,10 +785,7 @@ public class Interpreter {
 						break;
 				}
 				nextRow++;
-//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
-//				{
-//					nextRow++;
-//				}
+
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -753,10 +810,7 @@ public class Interpreter {
 						break;
 				}
 				nextCol--;
-//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
-//				{
-//					nextCol--;
-//				}
+
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -781,10 +835,7 @@ public class Interpreter {
 						break;
 				}
 				nextRow--;
-//				while(Integer.parseInt(board[nextRow][nextCol]) == 1)
-//				{
-//					nextRow--;
-//				}
+
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -803,3 +854,5 @@ public class Interpreter {
 		return nextBlock;
 	}
 }
+
+// thank you, Larry Tesler
