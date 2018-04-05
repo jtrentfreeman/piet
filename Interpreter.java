@@ -68,11 +68,10 @@ public class Interpreter {
 			threeLines[firstThreeLines] = newLine;
 			firstThreeLines++;
 		}
-		
+				
 		String[] colrow = threeLines[1].split("\\s");
 		totCol = Integer.parseInt(colrow[0]);
 		totRow = Integer.parseInt(colrow[1]);
-		
 		String appendThis = "";
 		
 		// getting all the colors, number crunching
@@ -183,8 +182,8 @@ public class Interpreter {
 	public static void readBoard(String[][] board)
 	{
 		boolean[][] visited = new boolean[totRow][totCol];
-		for(int i = 0; i < totRow; i++)
-			for(int j = 0; j < totCol; j++)
+		for(int i = 0; i < totRow-1; i++)
+			for(int j = 0; j < totCol-1; j++)
 				visited[i][j] = false;
 
 		int nextRow = 0;
@@ -196,15 +195,15 @@ public class Interpreter {
 		int[] f = {nextRow, nextCol};
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
-		
-		for(int i = 0; i < totCol; i++) {
-			for(int j = 0; j < totRow; j++)
-			{
-				visited[i][j] = false;
-//		System.out.print(visited[i][j] + "\t");
-			}
-//		System.out.println();
-		}
+//		for(int i = 0; i < totRow; i++) {
+//			for(int j = 0; j < totCol; j++)
+//			{
+//				System.out.println(i + " " + j);
+//				visited[i][j] = false;
+////		System.out.print(visited[i][j] + "\t");
+//			}
+////		System.out.println();
+//		}
 		codels[0].size = initSize;
 //		codels[0].printCodel();
 		
@@ -221,8 +220,8 @@ public class Interpreter {
 			// initiate the newest Codel
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
-			for(int i = 0; i < totCol; i++) {
-				for(int j = 0; j < totRow; j++)
+			for(int i = 0; i < totRow-1; i++) {
+				for(int j = 0; j < totCol-1; j++)
 				{
 					visited[i][j] = false;
 //			System.out.print(visited[i][j] + "\t");
@@ -241,8 +240,8 @@ public class Interpreter {
 				codels[0] = new Codel(nextNonWhite, board);
 				codels[0].size = 1+findSizeCodel(board, visited, codels[0], nextNonWhite[0], nextNonWhite[1]);
 				
-				for(int i = 0; i < totCol; i++) {
-					for(int j = 0; j < totRow; j++)
+				for(int i = 0; i < totRow-1; i++) {
+					for(int j = 0; j < totCol-1; j++)
 					{
 						visited[i][j] = false;
 //				System.out.print(visited[i][j] + "\t");
@@ -265,11 +264,11 @@ public class Interpreter {
 							
 				// if I want to print the stack for debuggin
 //				System.out.println(Arrays.toString(stack.toArray()));
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(100);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 			}
 		}
 	}
@@ -773,10 +772,11 @@ public class Interpreter {
 		
 		int nextBlock[] = new int[2];
 
+//		System.out.println(attempt);
 		// we've tried every orientation and can't find a new Codel
 		if(attempt > 8)
 		{
-//			System.out.println("DONE");
+			System.out.println("DONE");
 			int[] fin = {0, 0};
 			end = true;
 			return fin;
