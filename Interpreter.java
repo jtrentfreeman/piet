@@ -196,7 +196,17 @@ public class Interpreter {
 		int[] f = {nextRow, nextCol};
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
+		
+		for(int i = 0; i < totCol; i++) {
+			for(int j = 0; j < totRow; j++)
+			{
+				visited[i][j] = false;
+//		System.out.print(visited[i][j] + "\t");
+			}
+//		System.out.println();
+		}
 		codels[0].size = initSize;
+//		codels[0].printCodel();
 		
 		// the program will end on it's own (hypothetically)
 		while(!end)
@@ -211,17 +221,42 @@ public class Interpreter {
 			// initiate the newest Codel
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
+			for(int i = 0; i < totCol; i++) {
+				for(int j = 0; j < totRow; j++)
+				{
+					visited[i][j] = false;
+//			System.out.print(visited[i][j] + "\t");
+				}
+//			System.out.println();
+			}
 			codels[1].size = initSize;
 			
+//			codels[1].printCodel();
 			// white codels act as a nop, meaning they don't go into the queue at all
 			if(codels[1].colorName.equals("white"))
 			{
+//				System.out.println("WE HAVE A WHITE BLOCK HERE");
 				int[] nextNonWhite = getNextBlockWhite(board, codels[1], g[0], g[1], 0);
+//				System.out.println("Next non white is at " + nextNonWhite[0] + " " + nextNonWhite[1]);
 				codels[0] = new Codel(nextNonWhite, board);
 				codels[0].size = 1+findSizeCodel(board, visited, codels[0], nextNonWhite[0], nextNonWhite[1]);
+				
+				for(int i = 0; i < totCol; i++) {
+					for(int j = 0; j < totRow; j++)
+					{
+						visited[i][j] = false;
+//				System.out.print(visited[i][j] + "\t");
+					}
+//				System.out.println();
+				}
+				
+//				codels[0].printCodel();
+//				continue;
 			}
 			else
 			{
+//				System.out.print("Performing command: " );
+//				System.out.println("DP: " + dp + " \tCC: " + cc);
 				// perform the command given by the two Codel's
 				getCommand(codels[0], codels[1]);
 				
@@ -229,7 +264,12 @@ public class Interpreter {
 				codels[0] = codels[1];
 							
 				// if I want to print the stack for debuggin
-//				System.out.println(Arrays.toString(stack.toArray()));
+				System.out.println(Arrays.toString(stack.toArray()));
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -273,7 +313,7 @@ public class Interpreter {
 				setCorners(c, newCoords[0], newCoords[1]);
 			}
 		}
-		
+
 		return count;
 	}
 
@@ -308,6 +348,7 @@ public class Interpreter {
 					switch(lightChange)
 					{
 						case 0:
+//							System.out.println("nop");
 							return;
 						case 1:	// push
 //							System.out.println("pushing " + cod1.size);
@@ -499,7 +540,7 @@ public class Interpreter {
 				c.bottomRight[0] = newX;
 			}
 			// if further down
-			if(newX > c.bottomLeft[1] || c.bottomLeft[1] == -1)
+			if(newX > c.bottomLeft[0] || c.bottomLeft[0] == -1)
 			{
 				c.bottomLeft[1] = newY;
 				c.bottomLeft[0] = newX;
@@ -760,7 +801,7 @@ public class Interpreter {
 						break;
 				}
 				nextCol++;
-				
+//				System.out.println("Trying board at " + nextRow + " " + nextCol);
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -785,7 +826,7 @@ public class Interpreter {
 						break;
 				}
 				nextRow++;
-
+//				System.out.println("Trying board at " + nextRow + " " + nextCol);
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
@@ -810,9 +851,10 @@ public class Interpreter {
 						break;
 				}
 				nextCol--;
-
+//				System.out.println("Trying board at " + nextRow + " " + nextCol);
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
+
 					if(attempt % 2 == 0)
 						rotateCC(1);
 					else
@@ -835,7 +877,7 @@ public class Interpreter {
 						break;
 				}
 				nextRow--;
-
+//				System.out.println("Trying board at " + nextRow + " " + nextCol);
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
 					if(attempt % 2 == 0)
