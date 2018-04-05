@@ -264,7 +264,7 @@ public class Interpreter {
 				codels[0] = codels[1];
 							
 				// if I want to print the stack for debuggin
-				System.out.println(Arrays.toString(stack.toArray()));
+//				System.out.println(Arrays.toString(stack.toArray()));
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
