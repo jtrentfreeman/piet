@@ -776,7 +776,7 @@ public class Interpreter {
 		// we've tried every orientation and can't find a new Codel
 		if(attempt > 8)
 		{
-			System.out.println("DONE");
+//			System.out.println("DONE");
 			int[] fin = {0, 0};
 			end = true;
 			return fin;
