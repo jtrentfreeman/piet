@@ -10,9 +10,10 @@ class Codel
 	int[] leftBottom = 	{-1, -1};	int[] leftTop = 		{-1, -1};
 	int[] topLeft = 		{-1, -1};	int[] topRight = 	{-1, -1};
 		
-	Codel()
+	Codel(String colorVal, String colorName)
 	{
-		
+		this.colorVal = colorVal;
+		this.colorName = colorName;
 	}
 
 	Codel(int[] xy, String[][] board)
