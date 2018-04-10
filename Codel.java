@@ -25,16 +25,17 @@ class Codel
 	public void printCodel()
 	{
 		System.out.println("\tCodel size: " + this.size);
-		System.out.println("\tCodel color value: " + this.colorVal);
+//		System.out.println("\tCodel color value: " + this.colorVal);
 		System.out.println("\tCodel color: " + this.colorName);
-		System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
+//		System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
 //		System.out.println("Codel's right-most & lower-most block is at " + this.rightBottom[0] + ", " + this.rightBottom[1]);
-		System.out.println("\tCodel's bottom-most & right-most block is at " + this.bottomRight[0] + ", " + this.bottomRight[1]);
-		System.out.println("\tCodel's bottom-most & left-most block is at " + this.bottomLeft[0] + ", " + this.bottomLeft[1]);
-		System.out.println("\tCodel's left-most & bottom-most block is at " + this.leftBottom[0] + ", " + this.leftBottom[1]);
-		System.out.println("\tCodel's left-most & top-most block is at " + this.leftTop[0] + ", " + this.leftTop[1]);
-//		System.out.println("Codel's upper-most & left-most block is at " + this.topLeft[0] + ", " + this.topLeft[1]);
-//		System.out.println("Codel's upper-most & right-most block is at " + this.topRight[0] + ", " + this.topRight[1]);
+//		System.out.println("\tCodel's bottom-most & right-most block is at " + this.bottomRight[0] + ", " + this.bottomRight[1]);
+//		System.out.println("\tCodel's bottom-most & left-most block is at " + this.bottomLeft[0] + ", " + this.bottomLeft[1]);
+//		System.out.println("\tCodel's left-most & bottom-most block is at " + this.leftBottom[0] + ", " + this.leftBottom[1]);
+//		System.out.println("\tCodel's left-most & top-most block is at " + this.leftTop[0] + ", " + this.leftTop[1]);
+//		System.out.println("\tCodel's upper-most & left-most block is at " + this.topLeft[0] + ", " + this.topLeft[1]);
+//		System.out.println("\tCodel's upper-most & right-most block is at " + this.topRight[0] + ", " + this.topRight[1]);
+//		System.out.println();
 	}
 		
 	public String codelIntoString(String val)

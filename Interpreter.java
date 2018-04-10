@@ -6,6 +6,7 @@ public class Interpreter {
 
 	private static int totRow;		// total number of rows
 	private static int totCol;		// total number of columns
+	private static int sizePix = 1;
 
 	private static String dp = "right";
 	private static String cc = "left";
@@ -28,6 +29,13 @@ public class Interpreter {
 		
 		// input file is passed in as an argument, guess it could be passed in without the .extension
 		File oldfile = new File(args[0]);
+		
+		// size of each block in the .ppm file, 1 implies 1 pixel -> 1 block, 4 implies 4 pix -> 1 block
+		if(args.length > 1)
+			sizePix = Integer.parseInt(args[1]);
+	
+//		System.out.println(sizePix);
+		
 		String firstBit = oldfile.getName().split("\\.")[0];
 		File newfile = new File(firstBit + ".txt");
 		
@@ -39,13 +47,12 @@ public class Interpreter {
 		
 		String[][] board = fileToBoard("tmp.txt");
 
-		// performing the actual file 
-		readBoard(board);
-		
 		// want our original file back
 		File endfile = new File(firstBit + ".ppm");
-		newfile.renameTo(endfile);
+		newfile.renameTo(endfile);	
 		
+		// performing the actual file 
+		readBoard(board);
 		
 	}
 	
@@ -156,9 +163,9 @@ public class Interpreter {
 		
 		File infile = new File(s);
 		Scanner s2 = new Scanner(infile);
-
+		totRow = totRow / sizePix;
 		String[] wholeLine = new String[totRow];
-		for(int i = 0; i < totRow; i++)
+		for(int i = 0; i < totRow; i ++)
 		{
 			wholeLine[i] = s2.nextLine();
 			String[] brokenLine = wholeLine[i].split(" ");
@@ -168,7 +175,7 @@ public class Interpreter {
 		String[][] board = new String[totRow][totCol];
 		for(int i = 0; i < totRow; i++)
 		{
-			for(int j = 0; j < totCol; j++)
+			for(int j = 0; j < totCol; j += sizePix)
 			{
 				String[] brokenLine = wholeLine[i].split(" ");
 				board[i][j] = brokenLine[j];
@@ -226,6 +233,7 @@ public class Interpreter {
 				}
 			codels[1].size = initSize;
 //			codels[1].printCodel();
+//			System.out.println("dp = " + dp + " \tcc = " + cc);
 			
 			// white codels act as a nop, meaning they don't go into the queue at all
 			if(codels[1].colorName.equals("white"))
@@ -276,7 +284,7 @@ public class Interpreter {
 		for(int i = 0; i < 4; i++)
 		{
 			if(i == 0)
-				newCoords = new int[]{a, b-1};
+				newCoords = new int[] {a, b-1};
 			else if(i == 1)
 				newCoords = new int[] {a, b+1};
 			else if(i == 2)
@@ -404,7 +412,7 @@ public class Interpreter {
 							return;
 						case 1: // pointer
 							valT = stack.pop();
-//							System.out.println("dp " + valT);
+//							System.out.println("dp pointer " + valT);
 							rotateDP(valT);
 							return;
 						case 2: // switch
@@ -466,18 +474,24 @@ public class Interpreter {
 								valT--;
 //								return;
 							}
-//							System.out.println(Arrays.toString(stack.toArray()));
+//							System.out.println("After roll: " + Arrays.toString(stack.toArray()));
 							if(reverseFlag)
 							{
 //								System.out.println("Reversed");
 								int[] vals = new int[size];
 								for(int i = 0; i < size; i++)
+								{
 									vals[i] = stack.pop();
-								for(int i = size - 1; i >= 0; i--)
+//									System.out.println("stack at "+ i + " " + vals[i]);
+									
+								}
+								for(int i = 0 ; i < size; i++)
 									stack.push(vals[i]);
+
+								reverseFlag = false;
 							}
 							
-//							System.out.println(Arrays.toString(stack.toArray()));
+//							System.out.println("After re-reverse: " + Arrays.toString(stack.toArray()));
 							
 							return;
 						case 2: // inNum
@@ -655,6 +669,7 @@ public class Interpreter {
 	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int	
 	public static void rotateDP(int val)
 	{
+//		System.out.println("Rotating DP " + val);
 		
 		if(val == 0)
 			return;
@@ -713,6 +728,7 @@ public class Interpreter {
 		int[] nextBlock = new int[2];
 		int nextRow = row;
 		int nextCol = col;
+		
 			
 		// moving in a straight line, unless it goes out of bounds or hits a black box
 		switch(dp)
@@ -723,11 +739,13 @@ public class Interpreter {
 //					System.out.println("new val is " + board[nextRow][nextCol] + " at " + nextRow + " " + nextCol);
 					if(!inBounds(nextRow, nextCol+1))
 					{
+//						System.out.print("Rotating here @ right: " );
 						rotateDP(1);
 						return getNextBlockWhite(board, c, row, col, attempt);
 					}
 					else if(Integer.parseInt(board[nextRow][nextCol+1]) == 0)
 					{
+//						System.out.print("Rotating here2 @ right: " );
 						rotateCC(1);
 						rotateDP(1);
 						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
@@ -741,11 +759,13 @@ public class Interpreter {
 				{
 					if(!inBounds(nextRow, nextCol-1))
 					{
+//						System.out.print("Rotating here @ left: " );
 						rotateDP(1);
 						return getNextBlockWhite(board, c, row, col, attempt);
 					}
 					else if(Integer.parseInt(board[nextRow][nextCol-1]) == 0)
 					{
+//						System.out.print("Rotating here2 @ left: " );
 						rotateCC(1);
 						rotateDP(1);
 						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
@@ -758,11 +778,13 @@ public class Interpreter {
 				{
 					if(!inBounds(nextRow+1, nextCol))
 					{
+//						System.out.print("Rotating here @ down: " );
 						rotateDP(1);
 						return getNextBlockWhite(board, c, row, col, attempt);
 					}
 					else if(Integer.parseInt(board[nextRow+1][nextCol]) == 0)
 					{
+//						System.out.print("Rotating here2 @ down: " );
 						rotateCC(1);
 						rotateDP(1);
 						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
@@ -775,11 +797,13 @@ public class Interpreter {
 				{
 					if(!inBounds(nextRow-1, nextCol))
 					{
+//						System.out.print("Rotating here @ up: " );
 						rotateDP(1);
 						return getNextBlockWhite(board, c, row, col, attempt);
 					}
 					else if(Integer.parseInt(board[nextRow-1][nextCol]) == 0)
 					{
+//						System.out.print("Rotating here2 @ up: " );
 						rotateCC(1);
 						rotateDP(1);
 						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
@@ -830,6 +854,7 @@ public class Interpreter {
 
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
+//					System.out.println("Maybe rotate DP");
 					if(attempt % 2 == 0)
 						rotateCC(1);
 					else
@@ -854,7 +879,8 @@ public class Interpreter {
 				nextRow++;
 
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
-				{
+				{						
+//					System.out.print("Rotating here @ up: " );
 					if(attempt % 2 == 0)
 						rotateCC(1);
 					else
@@ -880,7 +906,7 @@ public class Interpreter {
 
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
-
+//					System.out.print("Rotating here @ up: " );
 					if(attempt % 2 == 0)
 						rotateCC(1);
 					else
@@ -906,6 +932,7 @@ public class Interpreter {
 
 				if(!inBounds(nextRow, nextCol) || Integer.parseInt(board[nextRow][nextCol]) == 0)
 				{
+//					System.out.print("Rotating here @ up: " );
 					if(attempt % 2 == 0)
 						rotateCC(1);
 					else
