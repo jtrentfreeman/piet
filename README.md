@@ -8,6 +8,10 @@ To run:
 
 This is an interpreter for the esoteric programming language Piet.
 
+Keep in mind that I did not write any of the .ppm files included in this directory.
+Instead I used the examples included with npiet (https://www.bertnase.de/npiet/) for testing.
+I don't personally know if these are all perfectly written, I've just been using these as a base to test my program.
+
 Just a fun project I've been wanting to work on for a little while now.
 
 The Piet syntax, commands, etc. are all described at http://www.dangermouse.net/esoteric/piet.html
