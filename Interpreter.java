@@ -951,3 +951,6 @@ public class Interpreter {
 }
 
 // thank you, Larry Tesler
+// realized that ^ may sound like I was copy+pasting from outside sources, I wasn't
+// some of the code (converting numbers -> colors) was repetitive, where I c+p'd a lot
+// all of this code was written by myself (Trent Freeman), and no code was taken from any outside sources
