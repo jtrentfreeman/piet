@@ -2,11 +2,21 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+		The block comments are things I think are to be fixed, but cant test them at work
+		But I low-key cant do anything at work until DevNet is fixed so revisiting past project to make them
+			actually work is ok too, maybe
+		So watch out for weird things that happen now because I modified some code and at the moment cant tell what works
+		
+		Probably actually pushing this to a dev branch (that seems smart) instead of master...
+**/
+
+// http://www.dangermouse.net/esoteric/piet.html
 public class Interpreter {
 
 	private static int totRow;		// total number of rows
 	private static int totCol;		// total number of columns
-	private static int sizePix = 1;
+	private static int sizePix = 1;		// so some .png files (taken from dangermouse.net) will be larger than normal for viewing, eventually want to be able to take all test cases
 
 	private static String dp = "right";
 	private static String cc = "left";
@@ -15,8 +25,10 @@ public class Interpreter {
 	
 	private static boolean end = false;
 	
-	// Takes in a .ppm file as an argument, and runs it as a Piet program
-	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
+	// before: 	Takes in a .ppm file as an argument, and runs it as a Piet program
+		// Arg0: 	input file name
+		// Arg1: 	input file size (how much bigger is it than it should be?)
+	// after:		.ppm file is converted into its stack-based commands and output is directed to stdout
 	public static void main(String[] args) throws IOException
 	{
 		
@@ -24,10 +36,9 @@ public class Interpreter {
 //		Codel red = new Codel("11", "red");
 //		Codel dbl = new Codel("52", "dark blue");
 //		stack.push(10); stack.push(100); stack.push(108); stack.push(108); stack.push(3); stack.push(3); stack.push(3); stack.push(2);
-//		getCommand(red, dbl);
+//		getCommand(red, dbl);		
 		
-		
-		// input file is passed in as an argument, guess it could be passed in without the .extension
+		// input file is passed in as an argument
 		File oldfile = new File(args[0]);
 		
 		// size of each block in the .ppm file, 1 implies 1 pixel -> 1 block, 4 implies 4 pix -> 1 block
@@ -56,21 +67,27 @@ public class Interpreter {
 		
 	}
 	
-	// takes in a .txt file and converts the colors into my specified format
-	// eventually I might omit comments from the hex values too, but right now comments can only exist in the header
+	/** eventually I might omit comments from the hex values too, but right now comments can only exist in the header, and on their own lines **/
+	// before:	takes in a .txt file (that was a .ppm) and converts the colors into my specified format
+	// after:		colors in number form (00 - 62) are output in a file called "tmp.txt" 
 	public static void convertFile(String s) throws IOException, FileNotFoundException
 	{
 		File in = new File(s);
 		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
 		Scanner sc = new Scanner(in);
 		
-		// skipping the first 3 lines (these contain file information)
+		// skipping the first 3 lines; these contain file information as follows:
+		// P3 (or P6 (but we hate P6 on a personal level))
+		// numColumns numRows
+		// 255 (max number FF)
 		String[] threeLines = new String[3];
 		String newLine = "";
 		int firstThreeLines = 0;
 		while(firstThreeLines < 3)
 		{
 			newLine = sc.nextLine();
+			
+			/** comments exclude entire lines, shouldn't happen **/
 			while(newLine.contains("#"))
 				newLine = sc.nextLine();
 			
@@ -89,6 +106,7 @@ public class Interpreter {
 			if(i % totCol == 0 && i != 0)
 				appendThis += "\n";
 
+			// each batch of 3 integers matches the Reg/Green/Blue hex values
 			int r, g, b;
 			r = sc.nextInt();
 			g = sc.nextInt();
@@ -98,18 +116,18 @@ public class Interpreter {
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)		appendThis += "00 ";
+					if(b == 0x00)				appendThis += "00 ";
 					else if(b == 0xC0)	appendThis += "52 ";
 					else if(b == 0xFF)	appendThis += "51 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0x00)		appendThis += "32 ";
+					if(b == 0x00)				appendThis += "32 ";
 					else if(b == 0xC0)	appendThis += "42 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0x00)		appendThis += "31 ";
+					if(b == 0x00)				appendThis += "31 ";
 					else if(b == 0xFF)	appendThis += "41 ";
 				}
 			}
@@ -117,17 +135,17 @@ public class Interpreter {
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)		appendThis += "12 ";
+					if(b == 0x00)				appendThis += "12 ";
 					else if(b == 0xC0)	appendThis += "62 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0x00)		appendThis += "22 ";
+					if(b == 0x00)				appendThis += "22 ";
 					else if(b == 0xFF)	appendThis += "50 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0xC0)		appendThis += "30 ";
+					if(b == 0xC0)				appendThis += "30 ";
 					else if(b == 0xFF)	appendThis += "40 ";
 				}
 			}
@@ -135,17 +153,17 @@ public class Interpreter {
 			{
 				if(g == 0x00)
 				{
-					if(b == 0x00)		appendThis += "11 ";
+					if(b == 0x00)				appendThis += "11 ";
 					else if(b == 0xFF)	appendThis += "61 ";
 				}
 				else if(g == 0xC0)
 				{
-					if(b == 0xC0)		appendThis += "10 ";
+					if(b == 0xC0)				appendThis += "10 ";
 					else if(b == 0xFF)	appendThis += "60 ";
 				}
 				else if(g == 0xFF)
 				{
-					if(b == 0x00)		appendThis += "21 ";
+					if(b == 0x00)				appendThis += "21 ";
 					else if(b == 0xC0)	appendThis += "20 ";
 					else if(b == 0xFF)	appendThis += "01 ";
 				}
@@ -157,23 +175,63 @@ public class Interpreter {
 		sc.close();	
 	}
 	
-	// reading in the file and returning it as a 2d string array
+	// before: 	.ppm is converted into .txt that is exclusively numbers 00-62
+	// after: 	reading in the file and returning it as a 2d string array
 	public static String[][] fileToBoard(String s) throws FileNotFoundException
 	{
 		
 		File infile = new File(s);
 		Scanner s2 = new Scanner(infile);
+		
+		/** 
+	   	my effort to convert bigger files into files of correct size
+		 	will need to skip every nth row and every nth column
+
+			This 
+				RR	RR	BB	BB				->			RR xx BB xx
+				RR	RR	BB	BB				->			xx xx xx xx
+			becomes
+				RR BB
+			with a pixel size of 2 (the picture is 2x bigger)
+			
+			So, the final row and col will become 1/2 (1/n) as large as the original
+		**/
+		
 		totRow = totRow / sizePix;
+		totCol = totCol / sizePix;
+		
+		// each row contains all columns of that row
 		String[] wholeLine = new String[totRow];
-		for(int i = 0; i < totRow; i ++)
+		
+		// want to read in the rows, but skip the duplicates
+		for(int i = 0; i < totRow; i++)
 		{
 			wholeLine[i] = s2.nextLine();
+
+			// while we have bigger pixels, skip the extra rows
+			int numSkip = sizePix;
+			while(numSkip > 1)
+			{
+				s2.nextLine();
+				numSkip--;
+			}
+			
+			/** I honestly dont remember what this was doing, need to check what this does when I can get the program to run **/
 			String[] brokenLine = wholeLine[i].split(" ");
 			totCol = (totCol > brokenLine.length) ? totCol : brokenLine.length;
 		}
 
+		// resize the final board (totRow and totCol have already been modified)
+		/** 
+			So I think that I may need to modify the way the line is read into the board 
+			The brokenLine is read in at the same place the board is being written, which means they'll be the same
+			Maybe i and j should be ++, and the brokenLine should be read using a new variable, which increments += sizePix?
+			
+			Oh wait also: .ppm files arent distinguishing lines the same way
+			So I'd have to get the length of each row of pixels and skip *that* n times, on top of skipping every nth pixel
+		**/
 		String[][] board = new String[totRow][totCol];
-		for(int i = 0; i < totRow; i++)
+		for(int i = 0; i < totRow; i += sizePix)
 		{
 			for(int j = 0; j < totCol; j += sizePix)
 			{
@@ -187,7 +245,8 @@ public class Interpreter {
 		return board;
 	}
 	
-	// by now we've read in the file and pass it in as board
+	// before: 	by now we've read in the file and pass it in as board
+	// after: 	Codels sizes and turns are calculated and converted into the commands
 	public static void readBoard(String[][] board)
 	{
 		boolean[][] visited = new boolean[totRow][totCol];
@@ -267,7 +326,8 @@ public class Interpreter {
 		}
 	}
 	
-	//
+	// before:	given a set of board of int colors, Codel to match, and coordinates
+	// after:		find how many spaces on the board match the Codel's color in direct proximity to the coords
 	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int a, int b)
 	{
 		// codel is uninitiated, so I need to set its corners
@@ -311,6 +371,8 @@ public class Interpreter {
 	}
 
 	// Here, col1 represents the last color, col2 is the newest color
+	// before:	given two Codels, with defined colors
+	// after:		colors are converted into commands and command is performed
 	public static void getCommand(Codel cod1, Codel cod2)
 	{
 
@@ -530,6 +592,8 @@ public class Interpreter {
 	}
 	
 	// Piet relies entirely on moving from a corner to a new color, need to set two corners (l, r) for each direction (l, r, u, d)
+	// before:	Codel is defined and coordinates exist in the Codels range
+	// after:		Codel has its 8 corners set  
 	public static void setCorners(Codel c, int newX, int newY)
 	{
 		
@@ -651,13 +715,16 @@ public class Interpreter {
 	}
 
 	// return whether the point will be in bounds
+	// before: 	two coordinate integers are input
+	// after:		true|false is returned based on whether or not coordinates are in range of picture
 	public static boolean inBounds(int i, int j)
 	{
 		return ((i >= 0) && (i < totRow) && (j >= 0) && (j < totCol));
 	}
 
-
 	// Java can't do modulo arithmetic correctly, so I made this
+	// before:	two numbers are given
+	// after:		the correct result of dividend % divisor is calculated
 	public static int correctMod(int dividend, int divisor)
 	{
 		while(dividend < 0)
@@ -666,7 +733,9 @@ public class Interpreter {
 		return dividend % divisor;
 	}
 	
-	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int	
+	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int
+	// before: 	a number is given
+	// after:		the DP is rotated that number of times clockwise
 	public static void rotateDP(int val)
 	{
 //		System.out.println("Rotating DP " + val);
@@ -709,6 +778,8 @@ public class Interpreter {
 	}
 	
 	// If rotateDP gets its own method then so does rotateCC
+	// before:	a number is given
+	// after:		the CC is changed that number of times
 	public static void rotateCC(int val)
 	{
 		if(correctMod(val, 2) == 2)
@@ -721,9 +792,11 @@ public class Interpreter {
 	}
 	
 	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
+	// before:	the board is given, along with the Codel to match, coords, and how many times we've tried rotating
+	// after:		the coords of the next block that isnt white are returned
+	// alternative: program exits after finding there are no new pathways
 	public static int[] getNextBlockWhite(String[][] board, Codel c,int row, int col, int attempt )
 	{
-		
 		
 		int[] nextBlock = new int[2];
 		int nextRow = row;
@@ -819,6 +892,9 @@ public class Interpreter {
 	}
 
 	// we're getting the newest codel, from the old one, c
+	// before:	board is given, along with a Codel to match, and how many times we've tried rotating
+	// after:		coords of the next block are given
+	// alternative: program exits after finding there are no new pathways
 	public static int[] getNextBlock(String[][] board, Codel c, int attempt)
 	{
 		
