@@ -1,12 +1,14 @@
 class MyStack {
   int[] vals;
   int top = -1;
-  int ERROR_VAL = -13524;
+
+  int STACK_LIMIT = (int) Math.pow(2, 16);
+  int ERROR_VAL = Integer.MIN_VALUE;
 
 // 11/24/18 myStack is not fully incorporated into this, it may not print correctly, euch
   public MyStack()
   {
-    vals = new int[1000];
+    vals = new int[STACK_LIMIT];
   }
 
   public MyStack(int[] vals)
@@ -17,15 +19,18 @@ class MyStack {
   public MyStack(int val)
   {
     top++;
-    vals = new int[1000];
+    vals = new int[STACK_LIMIT];
     vals[top] = val;
     top++;
   }
 
   boolean push(int val)
   {
-    if(top >= 1000)
+    System.out.println("PUSHING " + val);
+    if(top >= STACK_LIMIT) {
+      System.out.println("REACHED TOP OF STACK");
       return false;
+    }
 
     else
     {
@@ -33,12 +38,13 @@ class MyStack {
       System.out.println("pushing : " +val + " at " + (top));
       vals[top] = val;
     }
-    System.out.println(vals[0]);
+    this.printStack();
     return true;
   }
 
   int pop()
   {
+
     if(top == -1)
       return ERROR_VAL;
 
@@ -52,8 +58,11 @@ class MyStack {
   }
 
   public void printStack() {
-    if(top == 0)
+    System.out.println("PRINTING STACK");
+    if(top == 0) {
+      System.out.println("[]");
       return;
+    }
 
     System.out.print("[");
     for(int i = 0; i < top; i++) {

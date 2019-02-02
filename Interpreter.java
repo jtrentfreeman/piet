@@ -24,12 +24,20 @@ public class Interpreter {
 //		red -> dark blue
 //		Codel red = new Codel("11", "red");
 //		Codel dbl = new Codel("52", "dark blue");
-//		stack.push(10); stack.push(100); stack.push(108); stack.push(108); stack.push(3); stack.push(3); stack.push(3); stack.push(2);
 //		getCommand(red, dbl);
 
+		String runFile;
+
+		if(args.length == 0) {
+			System.err.println("Please enter a .ppm file to run.");
+			Scanner sc = new Scanner(System.in);
+			runFile = sc.nextLine();
+		} else {
+			runFile = args[0];
+		}
 
 		// input file is passed in as an argument, guess it could be passed in without the .extension
-		File oldfile = new File(args[0]);
+		File oldfile = new File(runFile);
 
 		// size of each block in the .ppm file, 1 implies 1 pixel -> 1 block, 4 implies 4 pix -> 1 block
 		if(args.length > 1)
@@ -188,13 +196,21 @@ public class Interpreter {
 		return board;
 	}
 
+	public static boolean[][] markUnvisited(boolean[][] board) {
+		for(int i = 0; i < totRow - 1; i++) {
+			for(int j = 0; j < totCol - 1; j++) {
+				board[i][j] = false;
+			}
+		}
+
+		return board;
+	}
+
 	// by now we've read in the file and pass it in as board
 	public static void readBoard(String[][] board)
 	{
 		boolean[][] visited = new boolean[totRow][totCol];
-		for(int i = 0; i < totRow-1; i++)
-			for(int j = 0; j < totCol-1; j++)
-				visited[i][j] = false;
+		markUnvisited(visited);
 
 		int nextRow = 0;
 		int nextCol = 0;
@@ -205,12 +221,8 @@ public class Interpreter {
 		int[] f = {nextRow, nextCol};
 		codels[0] = new Codel(f, board);
 		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
-		for(int i = 0; i < totRow-1; i++) {
-			for(int j = 0; j < totCol-1; j++)
-			{
-				visited[i][j] = false;
-			}
-		}
+		markUnvisited(visited);
+
 		codels[0].size = initSize;
 //		codels[0].printCodel();
 
@@ -227,11 +239,7 @@ public class Interpreter {
 			// initiate the newest Codel
 			codels[1] = new Codel(g, board);
 			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
-			for(int i = 0; i < totRow-1; i++)
-				for(int j = 0; j < totCol-1; j++)
-				{
-					visited[i][j] = false;
-				}
+			markUnvisited(visited);
 			codels[1].size = initSize;
 //			codels[1].printCodel();
 //			System.out.println("dp = " + dp + " \tcc = " + cc);
@@ -243,9 +251,7 @@ public class Interpreter {
 				codels[0] = new Codel(nextNonWhite, board);
 				codels[0].size = 1+findSizeCodel(board, visited, codels[0], nextNonWhite[0], nextNonWhite[1]);
 
-				for(int i = 0; i < totRow-1; i++)
-					for(int j = 0; j < totCol-1; j++)
-						visited[i][j] = false;
+				markUnvisited(visited);
 
 //				codels[0].printCodel();
 			}
@@ -258,8 +264,9 @@ public class Interpreter {
 				codels[0] = codels[1];
 
 				// if I want to print the stack for debuggin and slow down time
-				System.out.println(Arrays.toString(stack.toArray()));
-				myStack.printStack();
+//				System.out.println("THE REAL STACK");
+//				System.out.print("\n" + Arrays.toString(stack.toArray()));
+//				myStack.printStack();
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
@@ -347,78 +354,78 @@ public class Interpreter {
 //							System.out.println("nop");
 							return;
 						case 1:	// push
-							System.out.println("pushing " + cod1.size);
+//							System.out.println("pushing " + cod1.size);
 							stack.push(cod1.size);
-							myStack.push(cod1.size);
+//							myStack.push(cod1.size);
 							return;
 						case 2: // pop
 							System.out.println("pop");
 							stack.pop();
-							myStack.pop();
+//							myStack.pop();
 							return;
 					}
 				case 1:
 					switch(lightChange)
 					{
 						case 0: // add
-							System.out.println("add");
+//							System.out.println("add");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
 							stack.push(valB + valT);
-							myStack.push(valB2 + valT2);
+//							myStack.push(valB2 + valT2);
 							return;
 						case 1: // subtract
-							System.out.println("sub");
+//							System.out.println("sub");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
 							stack.push(valB - valT);
-							myStack.push(valB2 - valT2);
+//							myStack.push(valB2 - valT2);
 							return;
 						case 2: // multiply
-							System.out.println("multiply");
+//							System.out.println("multiply");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
 							stack.push(valB * valT);
-							myStack.push(valB2 * valT2);
+//							myStack.push(valB2 * valT2);
 							return;
 					}
 				case 2:
 					switch(lightChange)
 					{
 						case 0: // divide
-							System.out.println("divide");
+//							System.out.println("divide");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
 							stack.push(valB / valT);
-							myStack.push(valB2 / valT2);
+//							myStack.push(valB2 / valT2);
 							return;
 						case 1: // mod
-							System.out.println("mod");
+//							System.out.println("mod");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
 							stack.push(correctMod(valB, valT));
-							myStack.push(correctMod(valB2, valT2));
+//							myStack.push(correctMod(valB2, valT2));
 							return;
 						case 2: // not
-							System.out.println("not");
+//							System.out.println("not");
 							valT = stack.pop();
-							valT2 = myStack.pop();
-							if(valT2 == 0) {
+//							valT2 = myStack.pop();
+							if(valT == 0) {
 								stack.push(1);
-								myStack.push(1);
+//								myStack.push(1);
 							} else {
 								stack.push(0);
-								myStack.push(1);
+//								myStack.push(1);
 							}
 							return;
 					}
@@ -426,61 +433,66 @@ public class Interpreter {
 					switch(lightChange)
 					{
 						case 0: // greater
-							System.out.println("greater");
+//							System.out.println("greater");
 							valT = stack.pop();
 							valB = stack.pop();
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
-							if(valB2 > valT2)
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
+							if(valB > valT) {
 								stack.push(1);
-							else
+//								myStack.push(1);
+							} else {
 								stack.push(0);
+//								myStack.push(0);
+							}
 							return;
 						case 1: // pointer
 							valT = stack.pop();
-							valT2 = myStack.pop();
-							System.out.println("dp pointer " + valT);
-							rotateDP(valT2);
+//							valT2 = myStack.pop();
+//							System.out.println("dp pointer " + valT);
+							rotateDP(valT);
 							return;
 						case 2: // switch
-							System.out.println("switch");
+//							System.out.println("switch");
 							valT = stack.pop();
-							valT2 = myStack.pop();
-							rotateCC(valT2);
+//							valT2 = myStack.pop();
+							rotateCC(valT);
 							return;
 					}
 				case 4:
 					switch(lightChange)
 					{
 						case 0:	// duplicate
-							System.out.println("duplicate");
+//							System.out.println("duplicate");
 							valT = stack.pop();
-							valT2 = myStack.pop();
+//							valT2 = myStack.pop();
 							stack.push(valT);
-							stack.push(valT2);
+//							myStack.push(valT2);
 							return;
 						case 1: // roll
-							System.out.println("roll");
+//							System.out.println("roll");
 
 							valT = stack.pop();	// # rolls
 							valB = stack.pop(); // Depth of roll
-							valT2 = myStack.pop();
-							valB2 = myStack.pop();
-							if(valT2 == 0)
+//							valT2 = myStack.pop();
+//							valB2 = myStack.pop();
+							if(valT == 0) {
 								return;
+							}
 
 							boolean reverseFlag = false;
 							int size = myStack.size();
-							if(valT2 < 0)
+							if(valT < 0)
 							{
 								reverseFlag = true;
 								int vals[] = new int[size];
-								for(int i = 0; i < size; i++)
-									vals[i] = myStack.pop();
+								for(int i = 0; i < size; i++) {
+									vals[i] = stack.pop();
+								}
 								for(int i = 0; i < size; i++)
 								{
-									System.out.println("Pushing " + vals[i]);
-									myStack.push(vals[i]);
+//									System.out.println("Pushing " + vals[i]);
+									stack.push(vals[i]);
 								}
 								valT = -valT;
 							}
@@ -488,20 +500,21 @@ public class Interpreter {
 
 //							System.out.println(Arrays.toString(stack.toArray()));
 
-							while(valT2 > 0)
+							while(valT > 0)
 							{
-								System.out.println("Rolling stack " + valT + " times, " + valB + " deep");
-								int rollNum = myStack.pop();
+//								System.out.println("Rolling stack " + valT + " times, " + valB + " deep");
+								int rollNum = stack.pop();
 								int[] vals = new int[size];
 								for(int i = 0; i < valB-1; i++) {
-									vals[i] = myStack.pop();
+									vals[i] = stack.pop();
 //									System.out.println("Popped : " +vals[i]);
 								}
-								myStack.push(rollNum);
+								stack.push(rollNum);
 //								System.out.println("Pushed " + rollNum);
 //								System.out.println(Arrays.toString(stack.toArray()));
-								for(int i = valB - 2; i >= 0; i--)
-									myStack.push(vals[i]);
+								for(int i = valB - 2; i >= 0; i--) {
+									stack.push(vals[i]);
+								}
 								valT--;
 //								return;
 							}
@@ -512,12 +525,12 @@ public class Interpreter {
 								int[] vals = new int[size];
 								for(int i = 0; i < size; i++)
 								{
-									vals[i] = myStack.pop();
+									vals[i] = stack.pop();
 //									System.out.println("stack at "+ i + " " + vals[i]);
 
 								}
 								for(int i = 0 ; i < size; i++)
-									myStack.push(vals[i]);
+									stack.push(vals[i]);
 
 								reverseFlag = false;
 							}
@@ -526,36 +539,42 @@ public class Interpreter {
 
 							return;
 						case 2: // inNum
-							System.out.println("in num");
+//							System.out.println("in num");
 							Scanner s = new Scanner(System.in);
 							int i = s.nextInt();
-							myStack.push(i);
+							stack.push(i);
+//							myStack.push(i);
 							return;
 					}
 				case 5:
 					switch(lightChange)
 					{
 						case 0: // inChar
-							System.out.println("in char");
+//							System.out.println("in char");
 							Scanner s = new Scanner(System.in);
 							char i = s.next().charAt(0);
 							int j = i;
-							myStack.push(j);
+							stack.push(j);
+//							myStack.push(j);
 							return;
 						case 1: // outNum
-							System.out.println("out num");
-							int k = myStack.pop();
+//							System.out.println("out num");
+//							stack.pop();
+							int k = stack.pop();
 							System.out.print(k);
 							return;
 						case 2: // outChar
-							System.out.println("out char");
-							int l = myStack.pop();
+//							System.out.println("out char");
+//							stack.pop();
+							int l = stack.pop();
 							char m = (char) l;
-							System.out.print("printing out :" + l + "/" + m);
+							System.out.print(m);
 							return;
 					}
 			}
-		} catch(EmptyStackException e) {	}
+		} catch(EmptyStackException e) {
+			System.out.println(e.getMessage());
+		}
 
 		return;
 	}
