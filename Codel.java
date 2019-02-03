@@ -9,11 +9,11 @@ class Codel
 	int[] bottomRight = 	{-1, -1};	int[] bottomLeft = 	{-1, -1};
 	int[] leftBottom = 	{-1, -1};	int[] leftTop = 	{-1, -1};
 	int[] topLeft = 	{-1, -1};	int[] topRight = 	{-1, -1};
-		
+
 	Codel()
-	{	
+	{
 	}
-	
+
 	Codel(String colorVal, String colorName)
 	{
 		this.colorVal = colorVal;
@@ -25,14 +25,16 @@ class Codel
 		this.colorVal = board[xy[0]][xy[1]];
 		this.colorName = codelIntoString(colorVal);
 	}
-	
-	public void printCodel()
+
+	public void printCodel(int printLevel)
 	{
-		System.out.println("\tCodel size: " + this.size);
-		System.out.println("\tCodel color value: " + this.colorVal);
-		System.out.println("\tCodel color: " + this.colorName);
+		if(printLevel > 3) {
+			System.out.println("\tCodel size: " + this.size);
+			System.out.println("\tCodel color value: " + this.colorVal);
+			System.out.println("\tCodel color: " + this.colorName);
+		}
 	}
-	
+
 	public void debugCodel()
 	{
 		System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop[0] + ", " + this.rightTop[1]);
@@ -43,9 +45,9 @@ class Codel
 		System.out.println("\tCodel's left-most & top-most block is at " + this.leftTop[0] + ", " + this.leftTop[1]);
 		System.out.println("\tCodel's upper-most & left-most block is at " + this.topLeft[0] + ", " + this.topLeft[1]);
 		System.out.println("\tCodel's upper-most & right-most block is at " + this.topRight[0] + ", " + this.topRight[1]);
-		System.out.println();		
+		System.out.println();
 	}
-		
+
 	public String codelIntoString(String val)
 	{
 		switch(val)
