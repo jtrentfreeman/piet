@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import com.util.CC;
+import com.util.DP;
 
 public class Interpreter {
 
@@ -10,15 +12,18 @@ public class Interpreter {
 
 	private static int printLevel = 0;
 
-	private static String dp = "right";
-	private static String cc = "left";
+	private static DP dp = DP.RIGHT;
+	private static CC cc = CC.LEFT;
 
 	private static Stack<Integer> stack = new Stack<Integer>();
 
 	private static boolean end = false;
 
-	// Takes in a .ppm file as an argument, and runs it as a Piet program
-	// The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
+	//
+  /**
+   * Takes in a .ppm file as an argument, and runs it as a Piet program
+ 	 * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
+   */
 	public static void main(String[] args) throws IOException
 	{
 
@@ -64,9 +69,11 @@ public class Interpreter {
 
 	}
 
-	// takes in a .txt file and converts the colors into my specified format
-	// eventually I might omit comments from the hex values too, but right now comments can only exist in the header
-	public static void convertFile(String s) throws IOException, FileNotFoundException
+  /**
+   * Takes in a .txt file and converts the colors into my specified format
+   * Eventually I might omit comments from the hex values too, but right now comments can only exist in the header
+   */
+	public static void convertFile(String s)
 	{
 		File in = new File(s);
 		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
@@ -220,7 +227,7 @@ public class Interpreter {
 
 			codels[1].size = initSize;
 			codels[1].printCodel(printLevel);
-			printCommand("dp = " + dp + " \tcc = " + cc, 3);
+			printCommand("DP = " + dp + " \tCC = " + CC, 3);
 
 			// white codels act as a nop, meaning they don't go into the queue at all
 			if(codels[1].colorName.equals("white"))
@@ -407,7 +414,7 @@ public class Interpreter {
 							return;
 						case 1: // pointer
 							valT = stack.pop();
-							printCommand("dp pointer " + valT, 1);
+							printCommand("DP pointer " + valT, 1);
 							rotateDP(valT);
 							return;
 						case 2: // switch
@@ -640,7 +647,7 @@ public class Interpreter {
 		return dividend % divisor;
 	}
 
-	// the rotateDP command takes up a lot of space, which could be eliminated by making dp an int
+	// the rotateDP command takes up a lot of space, which could be eliminated by making DP an int
 	public static void rotateDP(int val) {
 		printCommand("Rotating DP " + val, 2);
 
@@ -650,27 +657,27 @@ public class Interpreter {
 
 		if(val > 0) {
 			while(val > 0) {
-				if(dp.equals("right"))
-					dp = "down";
-				else if(dp.equals("down"))
-					dp = "left";
-				else if(dp.equals("left"))
-					dp = "up";
-				else
-					dp = "right";
+				if(dp.equals(DP.RIGHT))
+					dp = DP.DOWN;
+				else if(DP.equals(DP.DOWN))
+					dp = DP.LEFT;
+				else if(DP.equals(DP.LEFT))
+					dp = DP.UP;
+				else if(DP.equals(DP.UP))
+					dp = DP.RIGHT;
 				val--;
 			}
 		}
 		if(val < 0) {
 			while(val < 0) {
-				if(dp.equals("right")) {
-					dp = "up";
-				} else if(dp.equals("up")) {
-					dp = "left";
-				} else if(dp.equals("left")) {
-					dp = "down";
+				if(DP.equals(DP.RIGHT)) {
+					dp = DP.UP;
+        } else if(DP.equals(DP.UP)) {
+					dp = DP.LEFT;
+				} else if(DP.equals(DP.LEFT)) {
+					dp = DP.DOWN;
 				} else {
-					dp = "right";
+					dp = DP.RIGHT;
 				}
 				val++;
 			}
@@ -684,10 +691,10 @@ public class Interpreter {
 		if(correctMod(val, 2) == 2)
 			return;
 		else
-			if(cc.equals("right"))
-				cc = "left";
+			if(CC.equals(CC.RIGHT))
+				cc = CC.LEFT;
 			else
-				cc = "right";
+				cc = CC.RIGHT;
 	}
 
 	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
@@ -701,7 +708,7 @@ public class Interpreter {
 
 		// moving in a straight line, unless it goes out of bounds or hits a black box
 		switch(dp) {
-			case "right":
+			case DP.RIGHT:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					printCommand("new val is " + board[nextRow][nextCol] + " at " + nextRow + " " + nextCol, 2);
 					if(!inBounds(nextRow, nextCol+1)) {
@@ -718,7 +725,7 @@ public class Interpreter {
 					nextCol++;
 				}
 				break;
-			case "left":
+			case DP.LEFT:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow, nextCol-1)) {
 						printCommand("Rotating here @ left: ", 4);
@@ -733,7 +740,7 @@ public class Interpreter {
 					nextCol--;
 				}
 				break;
-			case "down":
+			case DP.DOWN:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow+1, nextCol)) {
 						printCommand("Rotating here @ down: ", 4);
@@ -748,7 +755,7 @@ public class Interpreter {
 					nextRow++;
 				}
 				break;
-			case "up":
+			case DP.UP:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow-1, nextCol)) {
 						printCommand("Rotating here @ up: ", 4);
@@ -785,15 +792,15 @@ public class Interpreter {
 		int nextRow = 0, nextCol = 0;
 		switch(dp) {
 			// if we're going right
-			case "right":
+			case DP.RIGHT:
 				switch(cc) {
 					// we want to start from the right-top
-					case "left":
+					case CC.LEFT:
 						nextRow = c.rightTop[0];
 						nextCol = c.rightTop[1];
 						break;
 					// we want to start from the right-bottom
-					case "right":
+					case CC.RIGHT:
 						nextRow = c.rightBottom[0];
 						nextCol = c.rightBottom[1];
 						break;
@@ -813,13 +820,13 @@ public class Interpreter {
 					return getNextBlock(board, c, attempt + 1);
 				}
 				break;
-			case "down":
-				switch(cc) {
-					case "left":
+			case DP.DOWN:
+				switch(CC) {
+					case CC.LEFT:
 						nextRow = c.bottomRight[0];
 						nextCol = c.bottomRight[1];
 						break;
-					case "right":
+					case CC.RIGHT:
 						nextRow = c.bottomLeft[0];
 						nextCol = c.bottomLeft[1];
 						break;
@@ -838,13 +845,13 @@ public class Interpreter {
 
 				}
 				break;
-			case "left":
+			case DP.LEFT:
 				switch(cc) {
-					case "left":
+					case CC.LEFT:
 						nextRow = c.leftBottom[0];
 						nextCol = c.leftBottom[1];
 						break;
-					case "right":
+					case CC.RIGHT:
 						nextRow = c.leftTop[0];
 						nextCol = c.leftTop[1];
 						break;
@@ -863,13 +870,13 @@ public class Interpreter {
 					return getNextBlock(board, c, attempt + 1);
 				}
 				break;
-			case "up":
-				switch(cc) {
-					case "left":
+			case DP.UP:
+				switch(CC) {
+					case CC.LEFT:
 						nextRow = c.topLeft[0];
 						nextCol = c.topLeft[1];
 						break;
-					case "right":
+					case CC.RIGHT:
 						nextRow = c.topRight[0];
 						nextCol = c.topRight[1];
 						break;
