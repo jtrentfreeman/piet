@@ -1,24 +1,25 @@
-class Codel
-{
-	int size;
-	String colorVal;
-	String colorName;
+package com.util;
+
+public class Codel {
+	public int size;
+	public String colorVal;
+	public String colorName;
 
 	//					          row, col
-	int[] rightTop = 	    {-1, -1};	int[] rightBottom =	{-1, -1};
-	int[] bottomRight = 	{-1, -1};	int[] bottomLeft = 	{-1, -1};
-	int[] leftBottom = 	  {-1, -1};	int[] leftTop = 	  {-1, -1};
-	int[] topLeft = 	    {-1, -1};	int[] topRight = 	  {-1, -1};
+	public int[] rightTop = 	    {-1, -1};	public int[] rightBottom =	{-1, -1};
+	public int[] bottomRight = 	{-1, -1};	public int[] bottomLeft = 	{-1, -1};
+	public int[] leftBottom = 	  {-1, -1};	public int[] leftTop = 	  {-1, -1};
+	public int[] topLeft = 	    {-1, -1};	public int[] topRight = 	  {-1, -1};
 
-	Codel() {
+	public Codel() {
 	}
 
-	Codel(String colorVal, String colorName) {
+	public Codel(String colorVal, String colorName) {
 		this.colorVal = colorVal;
 		this.colorName = colorName;
 	}
 
-	Codel(int[] xy, String[][] board) {
+	public Codel(int[] xy, String[][] board) {
 		this.colorVal = board[xy[0]][xy[1]];
 		this.colorName = codelIntoString(colorVal);
 	}

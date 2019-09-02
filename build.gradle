@@ -1,0 +1,19 @@
+apply plugin:'java'
+
+version = '1.0'
+
+task fatJar(type: Jar) {
+    clean
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+        'Implementation-Version': version,
+        'Main-Class': 'com.controller.Interpreter'
+    }
+    baseName = project.name + '-all'
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    with jar
+}

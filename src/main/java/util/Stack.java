@@ -18,7 +18,7 @@ class MyStack
   {
     top++;
     vals = new int[1000];
-    val[top] = val;
+    vals[top] = val;
     top++;
   }
   

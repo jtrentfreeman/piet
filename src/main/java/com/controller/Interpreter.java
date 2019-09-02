@@ -3,6 +3,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import com.util.CC;
 import com.util.DP;
+import com.util.Codel;
 
 public class Interpreter {
 
@@ -19,10 +20,9 @@ public class Interpreter {
 
 	private static boolean end = false;
 
-	//
   /**
    * Takes in a .ppm file as an argument, and runs it as a Piet program
- 	 * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
+   * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
    */
 	public static void main(String[] args) throws IOException
 	{
@@ -75,10 +75,11 @@ public class Interpreter {
    */
 	public static void convertFile(String s)
 	{
-		File in = new File(s);
-		PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
-		Scanner sc = new Scanner(in);
-
+		try {
+			File in = new File(s);
+			PrintWriter writer = new PrintWriter("tmp.txt", "UTF-8");
+			Scanner sc = new Scanner(in);
+		
 		// skipping the first 3 lines (these contain file information)
 		String[] threeLines = new String[3];
 		String newLine = "";
@@ -158,6 +159,12 @@ public class Interpreter {
 		writer.print(appendThis);
 		writer.close();
 		sc.close();
+
+	} catch (FileNotFoundException e) {
+		System.out.println(e);
+	} catch (UnsupportedEncodingException e) {
+		System.out.println(e);
+	}
 	}
 
 	// reading in the file and returning it as a 2d string array
@@ -227,7 +234,7 @@ public class Interpreter {
 
 			codels[1].size = initSize;
 			codels[1].printCodel(printLevel);
-			printCommand("DP = " + dp + " \tCC = " + CC, 3);
+			printCommand("DP = " + dp + " \tCC = " + cc, 3);
 
 			// white codels act as a nop, meaning they don't go into the queue at all
 			if(codels[1].colorName.equals("white"))
@@ -657,24 +664,28 @@ public class Interpreter {
 
 		if(val > 0) {
 			while(val > 0) {
-				if(dp.equals(DP.RIGHT))
+				if(dp == DP.RIGHT) {
 					dp = DP.DOWN;
-				else if(DP.equals(DP.DOWN))
+				}
+				else if(dp == DP.DOWN) {
 					dp = DP.LEFT;
-				else if(DP.equals(DP.LEFT))
+			}
+				else if(dp == DP.LEFT) {
 					dp = DP.UP;
-				else if(DP.equals(DP.UP))
+				}
+				else if(dp == DP.UP) {
 					dp = DP.RIGHT;
+				}
 				val--;
 			}
 		}
 		if(val < 0) {
 			while(val < 0) {
-				if(DP.equals(DP.RIGHT)) {
+				if(dp == DP.RIGHT) {
 					dp = DP.UP;
-        } else if(DP.equals(DP.UP)) {
+        } else if(dp == DP.UP) {
 					dp = DP.LEFT;
-				} else if(DP.equals(DP.LEFT)) {
+				} else if(dp == DP.LEFT) {
 					dp = DP.DOWN;
 				} else {
 					dp = DP.RIGHT;
@@ -691,7 +702,7 @@ public class Interpreter {
 		if(correctMod(val, 2) == 2)
 			return;
 		else
-			if(CC.equals(CC.RIGHT))
+			if(cc == CC.RIGHT)
 				cc = CC.LEFT;
 			else
 				cc = CC.RIGHT;
@@ -708,7 +719,7 @@ public class Interpreter {
 
 		// moving in a straight line, unless it goes out of bounds or hits a black box
 		switch(dp) {
-			case DP.RIGHT:
+			case RIGHT:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					printCommand("new val is " + board[nextRow][nextCol] + " at " + nextRow + " " + nextCol, 2);
 					if(!inBounds(nextRow, nextCol+1)) {
@@ -725,7 +736,7 @@ public class Interpreter {
 					nextCol++;
 				}
 				break;
-			case DP.LEFT:
+			case LEFT:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow, nextCol-1)) {
 						printCommand("Rotating here @ left: ", 4);
@@ -740,7 +751,7 @@ public class Interpreter {
 					nextCol--;
 				}
 				break;
-			case DP.DOWN:
+			case DOWN:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow+1, nextCol)) {
 						printCommand("Rotating here @ down: ", 4);
@@ -755,7 +766,7 @@ public class Interpreter {
 					nextRow++;
 				}
 				break;
-			case DP.UP:
+			case UP:
 				while(Integer.parseInt(board[nextRow][nextCol]) == 1) {
 					if(!inBounds(nextRow-1, nextCol)) {
 						printCommand("Rotating here @ up: ", 4);
@@ -792,15 +803,15 @@ public class Interpreter {
 		int nextRow = 0, nextCol = 0;
 		switch(dp) {
 			// if we're going right
-			case DP.RIGHT:
+			case RIGHT:
 				switch(cc) {
 					// we want to start from the right-top
-					case CC.LEFT:
+					case LEFT:
 						nextRow = c.rightTop[0];
 						nextCol = c.rightTop[1];
 						break;
 					// we want to start from the right-bottom
-					case CC.RIGHT:
+					case RIGHT:
 						nextRow = c.rightBottom[0];
 						nextCol = c.rightBottom[1];
 						break;
@@ -820,13 +831,13 @@ public class Interpreter {
 					return getNextBlock(board, c, attempt + 1);
 				}
 				break;
-			case DP.DOWN:
-				switch(CC) {
-					case CC.LEFT:
+			case DOWN:
+				switch(cc) {
+					case LEFT:
 						nextRow = c.bottomRight[0];
 						nextCol = c.bottomRight[1];
 						break;
-					case CC.RIGHT:
+					case RIGHT:
 						nextRow = c.bottomLeft[0];
 						nextCol = c.bottomLeft[1];
 						break;
@@ -845,13 +856,13 @@ public class Interpreter {
 
 				}
 				break;
-			case DP.LEFT:
+			case LEFT:
 				switch(cc) {
-					case CC.LEFT:
+					case LEFT:
 						nextRow = c.leftBottom[0];
 						nextCol = c.leftBottom[1];
 						break;
-					case CC.RIGHT:
+					case RIGHT:
 						nextRow = c.leftTop[0];
 						nextCol = c.leftTop[1];
 						break;
@@ -870,13 +881,13 @@ public class Interpreter {
 					return getNextBlock(board, c, attempt + 1);
 				}
 				break;
-			case DP.UP:
-				switch(CC) {
-					case CC.LEFT:
+			case UP:
+				switch(cc) {
+					case LEFT:
 						nextRow = c.topLeft[0];
 						nextCol = c.topLeft[1];
 						break;
-					case CC.RIGHT:
+					case RIGHT:
 						nextRow = c.topRight[0];
 						nextCol = c.topRight[1];
 						break;
