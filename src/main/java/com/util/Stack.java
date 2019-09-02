@@ -1,34 +1,30 @@
-class MyStack
-{
+package com.util;
+
+class MyStack {
   int[] vals;
   int top = -1;
   int ERROR_VAL = -13524;
   
-  MyStack()
-  {
+  MyStack() {
     vals = new int[1000];
   }
   
-  MyStack(int[] vals)
-  {
+  MyStack(int[] vals) {
     this.vals = vals;
   }
   
-  MyStack(int val)
-  {
+  MyStack(int val) {
     top++;
     vals = new int[1000];
     vals[top] = val;
     top++;
   }
   
-  boolean push(int val)
-  {
+  boolean push(int val) {
     if(top >= 1000)
       return false;
       
-    else
-    {
+    else {
       vals[top] = val;
       top++;
     }
@@ -36,8 +32,7 @@ class MyStack
     return true;
   }
   
-  int pop()
-  {
+  int pop() {
     if(top == -1)
       return ERROR_VAL;
     
@@ -45,8 +40,7 @@ class MyStack
     return vals[top+1];
   }
   
-  int peek()
-  {
+  int peek() {
     return vals[top];
   }
   

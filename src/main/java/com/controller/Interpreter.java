@@ -1,6 +1,9 @@
+package com.controller;
+
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+
+import com.entity.Coordinate;
 import com.util.CC;
 import com.util.DP;
 import com.util.Codel;
@@ -34,10 +37,11 @@ public class Interpreter {
 //		getCommand(red, dbl);
 
 		String runFile = args[0];
+		Scanner sc;
 
 		if(args.length == 0) {
 			System.err.println("Please enter a .ppm file to run.");
-			Scanner sc = new Scanner(System.in);
+			sc = new Scanner(System.in);
 			runFile = sc.nextLine();
 		}
 
@@ -206,56 +210,57 @@ public class Interpreter {
 		int nextRow = 0;
 		int nextCol = 0;
 
-		Codel[] codels = new Codel[2];
+		List<Codel> codels = new ArrayList<>();
+		// Codel[] codels = new Codel[2];
 
 		// initiate the very first Codel
-		int[] f = {nextRow, nextCol};
-		codels[0] = new Codel(f, board);
-		int initSize = 1 + findSizeCodel(board, visited, codels[0], f[0], f[1]);
+		Coordinate first = new Coordinate(nextRow, nextCol);
+		codels.add(new Codel(first));
+		int initSize = 1 + findSizeCodel(board, visited, codels.get(0), first);
 		markUnvisited(visited);
 
-		codels[0].size = initSize;
+		codels.get(0).setSize(initSize);
 //		codels[0].printCodel();
 
 		// the program will end on it's own (hypothetically)
 		while(!end)
 		{
 			// get the coords of the next Codel
-			int[] nextBlock = getNextBlock(board, codels[0], 0);
+			int[] nextBlock = getNextBlock(board, codels.get(0), 0);
 			nextRow = nextBlock[0];
 			nextCol = nextBlock[1];
 
-			int[] g = {nextRow, nextCol};
+			Coordinate g = new Coordinate(nextRow, nextCol);
 
 			// initiate the newest Codel
-			codels[1] = new Codel(g, board);
-			initSize = 1+findSizeCodel(board, visited, codels[1], g[0], g[1]);
+			codels.add(new Codel(g));
+			initSize = 1+findSizeCodel(board, visited, codels.get(1), g);
 			markUnvisited(visited);
 
-			codels[1].size = initSize;
-			codels[1].printCodel(printLevel);
+			codels.get(1).setSize(initSize);
+			codels.get(1).printCodel(printLevel);
 			printCommand("DP = " + dp + " \tCC = " + cc, 3);
 
 			// white codels act as a nop, meaning they don't go into the queue at all
-			if(codels[1].colorName.equals("white"))
+			if(codels.get(1).getColorName().equals("white"))
 			{
-				int[] nextNonWhite = getNextBlockWhite(board, codels[1], g[0], g[1], 0);
-				codels[0] = new Codel(nextNonWhite, board);
-				codels[0].size = 1+findSizeCodel(board, visited, codels[0], nextNonWhite[0], nextNonWhite[1]);
+				Coordinate nextNonWhite = getNextBlockWhite(board, codels.get(1), g, 0);
+				codels.set(0, new Codel(nextNonWhite));
+				codels.get(0).setSize(1+findSizeCodel(board, visited, codels.get(1), nextNonWhite));
 
 				markUnvisited(visited);
 
 //				codels[0].printCodel();
 			}
 			else
-			{
+			{ 
 				// perform the command given by the two Codel's
-				getCommand(codels[0], codels[1]);
+				getCommand(codels.get(0), codels.get(1));
 
-				// shift the new Codel to the old one's spot
-				codels[0] = codels[1];
+				//  shift the new Codel to the old one's spot
+				codels.set(0, codels.get(1));
 
-//				 if I want to print the stack for debuggin and slow down time
+				//  if I want to print the stack for debuggin and slow down time
 				printCommand(Arrays.toString(stack.toArray()), 2);
 				try {
 					if(printLevel > 0) {
@@ -268,43 +273,43 @@ public class Interpreter {
 		}
 	}
 
-	//
-	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, int a, int b)
-	{
+	//  
+	public static int findSizeCodel(String[][] board, boolean[][] visited, Codel c, Coordinate coord)
+	{ 
 		// codel is uninitiated, so I need to set its corners
-		if(c.rightTop[0] == -1)
+		if(c.getRightTop().getX() == -1)
 		{
-			setCorners(c, a, b);
+			setCorners(c, coord);
 		}
 
 		int count = 0;
-		visited[a][b] = true;
+		visited[coord.getX()][coord.getY()] = true;
 
 		// 4 directions the program will search in for more of the same color
-		int[] newCoords = {-1, -1};
+		Coordinate newCoordinate = new Coordinate();
 		for(int i = 0; i < 4; i++)
 		{
 			if(i == 0)
-				newCoords = new int[] {a, b-1};
+				newCoordinate = new Coordinate(coord.getX(), coord.getY()-1);
 			else if(i == 1)
-				newCoords = new int[] {a, b+1};
+				newCoordinate = new Coordinate(coord.getX(), coord.getY()+1);
 			else if(i == 2)
-				newCoords = new int[] {a-1, b};
+				newCoordinate = new Coordinate(coord.getX()-1, coord.getY());
 			else if(i == 3)
-				newCoords = new int[] {a+1, b};
+				newCoordinate = new Coordinate(coord.getX()+1, coord.getY());
 
 			// gonna skip this block if it's out of the board or visited
-			if(!inBounds(newCoords[0], newCoords[1]))
+			if(!inBounds(newCoordinate.getX(), newCoordinate.getY()))
 				continue;
 
-			if(visited[newCoords[0]][newCoords[1]])
+			if(visited[newCoordinate.getX()][newCoordinate.getY()])
 				continue;
 
-			if(Integer.parseInt(board[newCoords[0]][newCoords[1]]) == Integer.parseInt(c.colorVal))
+			if(Integer.parseInt(board[newCoordinate.getX()][newCoordinate.getY()]) == c.getColorValue())
 			{
 				count++;
-				count += findSizeCodel(board, visited, c, newCoords[0], newCoords[1]);
-				setCorners(c, newCoords[0], newCoords[1]);
+				count += findSizeCodel(board, visited, c, newCoordinate);
+				setCorners(c, newCoordinate);
 			}
 		}
 
@@ -321,17 +326,18 @@ public class Interpreter {
 	public static void getCommand(Codel cod1, Codel cod2)
 	{
 
-		String col1 = cod1.colorVal;
-		String col2 = cod2.colorVal;
+		Integer col1 = cod1.getColorValue();
+		Integer col2 = cod2.getColorValue();
 
-		if(Integer.parseInt(cod1.colorVal) == 1 || Integer.parseInt(cod1.colorVal) == 1)
+		if(col1 == 1 || col2 == 1)
 		{
 			return;
 		}
 
 		// specific color doesn't matter, it's about the positive net change between two colors
-		int hueChange = Character.getNumericValue(col2.charAt(0)) - Character.getNumericValue(col1.charAt(0));
-		int lightChange = Character.getNumericValue(col2.charAt(1)) - Character.getNumericValue(col1.charAt(1));
+		Integer change = col1 - col2;
+		int hueChange = (change/10)%10;
+		int lightChange = (change)%10;
 
 		if(hueChange < 0)
 			hueChange += 6;
@@ -351,8 +357,8 @@ public class Interpreter {
 							printCommand("nop", 1);
 							return;
 						case 1:	// push
-							printCommand("pushing " + cod1.size, 1);
-							stack.push(cod1.size);
+							printCommand("pushing " + cod1.getSize(), 1);
+							stack.push(cod1.getSize());
 							return;
 						case 2: // pop
 							printCommand("pop", 1);
@@ -540,102 +546,87 @@ public class Interpreter {
 	}
 
 	// Piet relies entirely on moving from a corner to a new color, need to set two corners (l, r) for each direction (l, r, u, d)
-	public static void setCorners(Codel c, int newX, int newY)
+	public static void setCorners(Codel c, Coordinate coordinate)
 	{
 
 		// potential for new right column value
-		if(newY >= c.rightTop[1] || c.rightTop[1] == -1) {
+		if(coordinate.getY() >= c.getRightTop().getY() || c.getRightTop().getY() == -1) {
 			// if further right
-			if(newY > c.rightTop[1] || c.rightTop[1] == -1) {
-				c.rightTop[1] = newY;
-				c.rightTop[0] = newX;
+			if(coordinate.getY() > c.getRightTop().getY() || c.getRightTop().getY() == -1) {
+				c.setRightTop(coordinate);
 			}
 			// if further up
-			if(newX < c.rightTop[0] || c.rightTop[0] == -1) {
-				c.rightTop[1] = newY;
-				c.rightTop[0] = newX;
+			if(coordinate.getX() < c.getRightTop().getX() || c.getRightTop().getX() == -1) {
+				c.setRightTop(coordinate);
 			}
 			// if further right
-			if(newY > c.rightBottom[1] || c.rightBottom[1] == -1) {
-				c.rightBottom[1] = newY;
-				c.rightBottom[0] = newX;
+			if(coordinate.getY() > c.getRightBottom().getY() || c.getRightBottom().getY() == -1) {
+				c.setRightBottom(coordinate);
 			}
 			// if further down
-			if(newX > c.rightBottom[0] || c.rightBottom[0] == -1) {
-				c.rightBottom[1] = newY;
-				c.rightBottom[0] = newX;
+			if(coordinate.getX() > c.getRightBottom().getX() || c.getRightBottom().getX() == -1) {
+				c.setRightBottom(coordinate);
 			}
 		}
 
 		// potential for new bottom row value
-		if(newX >= c.bottomRight[0] || c.bottomRight[0] == -1) {
+		if(coordinate.getX() >= c.getBottomRight().getX() || c.getBottomRight().getX() == -1) {
 			// if further down
-			if(newX > c.bottomRight[0] || c.bottomRight[0] == -1) {
-				c.bottomRight[0] = newX;
-				c.bottomRight[1] = newY;
+			if(coordinate.getX() > c.getBottomRight().getX() || c.getBottomRight().getX() == -1) {
+				c.setBottomRight(coordinate);
 			}
 			// if further right
-			if(newY > c.bottomRight[1] || c.bottomRight[1] == -1) {
-				c.bottomRight[1] = newY;
-				c.bottomRight[0] = newX;
+			if(coordinate.getY() > c.getBottomRight().getY() || c.getBottomRight().getY() == -1) {
+				c.setBottomRight(coordinate);
 			}
 			// if further down
-			if(newX > c.bottomLeft[0] || c.bottomLeft[0] == -1) {
-				c.bottomLeft[1] = newY;
-				c.bottomLeft[0] = newX;
+			if(coordinate.getX() > c.getBottomLeft().getX() || c.getBottomLeft().getX() == -1) {
+				c.setBottomLeft(coordinate);
 			}
 			// if further left
-			if(newY < c.bottomLeft[1] || c.bottomLeft[1] == -1 || c.bottomLeft[0] == -1) {
-				c.bottomLeft[1] = newY;
-				c.bottomLeft[0] = newX;
+			// TODO: investigate why this has three conditions
+			if(coordinate.getY() < c.getBottomLeft().getY() || c.getBottomLeft().getY() == -1 || c.getBottomLeft().getX() == -1) {
+				c.setBottomLeft(coordinate);
 			}
 		}
 
 		// potential for new left column value
-		if(newY <= c.leftBottom[1] || c.leftBottom[1] == -1) {
+		if(coordinate.getY() <= c.getLeftBottom().getY() || c.getLeftBottom().getY() == -1) {
 			// if further left
-			if(newY < c.leftBottom[1] || c.leftBottom[1] == -1) {
-				c.leftBottom[1] = newY;
-				c.leftBottom[0] = newX;
+			if(coordinate.getY() < c.getLeftBottom().getY() || c.getLeftBottom().getY() == -1) {
+				c.setLeftBottom(coordinate);
 			}
 			// if further down
-			if(newX > c.leftBottom[0] || c.leftBottom[0] == -1) {
-				c.leftBottom[1] = newY;
-				c.leftBottom[0] = newX;
+			if(coordinate.getX() > c.getLeftBottom().getX() || c.getLeftBottom().getX() == -1) {
+				c.setLeftBottom(coordinate);
 			}
 			// if further left
-			if(newY < c.leftTop[0] || c.leftTop[0] == -1) {
-				c.leftTop[0] = newX;
-				c.leftTop[1] = newY;
+			if(coordinate.getY() < c.getLeftTop().getX() || c.getLeftTop().getX() == -1) {
+				c.setLeftTop(coordinate);
 			}
 			// if further up
-			if(newX < c.leftTop[0] || c.leftTop[0] == -1) {
-				c.leftTop[0] = newX;
-				c.leftTop[1] = newY;
+			if(coordinate.getX() < c.getLeftTop().getX() || c.getLeftTop().getX() == -1) {
+				c.setLeftTop(coordinate);
 			}
 		}
 
 		// potential for upper-most row
-		if(newX <= c.topLeft[0] || c.topLeft[0] == -1) {
+		if(coordinate.getX() <= c.getTopLeft().getX() || c.getTopLeft().getX() == -1) {
 			// if further up
-			if(newX < c.topLeft[0] || c.topLeft[0] == -1) {
-				c.topLeft[0] = newX;
-				c.topLeft[1] = newY;
+			if(coordinate.getX() < c.getTopLeft().getX() || c.getTopLeft().getX() == -1) {
+				c.setTopLeft(coordinate);
 			}
 			// if further left
-			if(newY < c.topLeft[1] || c.topLeft[1] == -1) {
-				c.topLeft[1] = newY;
-				c.topLeft[0] = newX;
+			if(coordinate.getY() < c.getTopLeft().getY() || c.getTopLeft().getY() == -1) {
+				c.setTopLeft(coordinate);
 			}
 			// if further up
-			if(newX < c.topRight[0] || c.topRight[1] == -1) {
-				c.topRight[0] = newX;
-				c.topRight[1] = newY;
+			if(coordinate.getX() < c.getTopRight().getX() || c.getTopLeft().getY() == -1) {
+				c.setTopRight(coordinate);
 			}
 			// if further right
-			if(newY > c.topRight[1] || c.topRight[1] == -1) {
-				c.topRight[1] = newY;
-				c.topRight[0] = newX;
+			if(coordinate.getY() > c.getTopRight().getY() || c.getTopRight().getY() == -1) {
+				c.setTopRight(coordinate);
 			}
 		}
 	}
@@ -709,12 +700,12 @@ public class Interpreter {
 	}
 
 	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
-	public static int[] getNextBlockWhite(String[][] board, Codel c,int row, int col, int attempt ) {
+	public static Coordinate getNextBlockWhite(String[][] board, Codel c, Coordinate coordinate, int attempt ) {
 
 
 		int[] nextBlock = new int[2];
-		int nextRow = row;
-		int nextCol = col;
+		int nextRow = coordinate.getX();
+		int nextCol = coordinate.getY();
 
 
 		// moving in a straight line, unless it goes out of bounds or hits a black box
@@ -725,12 +716,12 @@ public class Interpreter {
 					if(!inBounds(nextRow, nextCol+1)) {
 						printCommand("Rotating here @ right: ", 4);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, row, col, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(Integer.parseInt(board[nextRow][nextCol+1]) == 0) {
 						printCommand("Rotating here2 @ right: ", 4);
 						rotateCC(1);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					}
 
 					nextCol++;
@@ -741,12 +732,12 @@ public class Interpreter {
 					if(!inBounds(nextRow, nextCol-1)) {
 						printCommand("Rotating here @ left: ", 4);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, row, col, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(Integer.parseInt(board[nextRow][nextCol-1]) == 0) {
 						printCommand("Rotating here2 @ left: ", 4);
 						rotateCC(1);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					}
 					nextCol--;
 				}
@@ -756,12 +747,12 @@ public class Interpreter {
 					if(!inBounds(nextRow+1, nextCol)) {
 						printCommand("Rotating here @ down: ", 4);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, row, col, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(Integer.parseInt(board[nextRow+1][nextCol]) == 0) {
 						printCommand("Rotating here2 @ down: ", 4);
 						rotateCC(1);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					}
 					nextRow++;
 				}
@@ -771,12 +762,12 @@ public class Interpreter {
 					if(!inBounds(nextRow-1, nextCol)) {
 						printCommand("Rotating here @ up: ", 4);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, row, col, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(Integer.parseInt(board[nextRow-1][nextCol]) == 0) {
 						printCommand("Rotating here2 @ up: ", 4);
 						rotateCC(1);
 						rotateDP(1);
-						return getNextBlockWhite(board, c, nextRow, nextCol, attempt);
+						return getNextBlockWhite(board, c, coordinate, attempt);
 					}
 					nextRow--;
 				}
@@ -785,7 +776,8 @@ public class Interpreter {
 
 		nextBlock[0] = nextRow;
 		nextBlock[1] = nextCol;
-		return nextBlock;
+		Coordinate nextCoord = new Coordinate(nextRow, nextCol);
+		return nextCoord;
 	}
 
 	// we're getting the newest codel, from the old one, c
@@ -807,13 +799,13 @@ public class Interpreter {
 				switch(cc) {
 					// we want to start from the right-top
 					case LEFT:
-						nextRow = c.rightTop[0];
-						nextCol = c.rightTop[1];
+						nextRow = c.getRightTop().getX();
+						nextCol = c.getRightTop().getY();
 						break;
 					// we want to start from the right-bottom
 					case RIGHT:
-						nextRow = c.rightBottom[0];
-						nextCol = c.rightBottom[1];
+						nextRow = c.getRightBottom().getX();
+						nextCol = c.getRightBottom().getY();
 						break;
 				}
 				nextCol++;
@@ -834,12 +826,12 @@ public class Interpreter {
 			case DOWN:
 				switch(cc) {
 					case LEFT:
-						nextRow = c.bottomRight[0];
-						nextCol = c.bottomRight[1];
+						nextRow = c.getBottomRight().getX();
+						nextCol = c.getBottomRight().getY();
 						break;
 					case RIGHT:
-						nextRow = c.bottomLeft[0];
-						nextCol = c.bottomLeft[1];
+						nextRow = c.getBottomLeft().getX();
+						nextCol = c.getBottomLeft().getY();
 						break;
 				}
 				nextRow++;
@@ -859,12 +851,12 @@ public class Interpreter {
 			case LEFT:
 				switch(cc) {
 					case LEFT:
-						nextRow = c.leftBottom[0];
-						nextCol = c.leftBottom[1];
+						nextRow = c.getLeftBottom().getX();
+						nextCol = c.getLeftBottom().getY();
 						break;
 					case RIGHT:
-						nextRow = c.leftTop[0];
-						nextCol = c.leftTop[1];
+						nextRow = c.getLeftTop().getX();
+						nextCol = c.getLeftTop().getY();
 						break;
 				}
 				nextCol--;
@@ -884,12 +876,12 @@ public class Interpreter {
 			case UP:
 				switch(cc) {
 					case LEFT:
-						nextRow = c.topLeft[0];
-						nextCol = c.topLeft[1];
+						nextRow = c.getTopLeft().getX();
+						nextCol = c.getTopLeft().getY();
 						break;
 					case RIGHT:
-						nextRow = c.topRight[0];
-						nextCol = c.topRight[1];
+						nextRow = c.getTopRight().getX();
+						nextCol = c.getTopRight().getY();
 						break;
 				}
 				nextRow--;
@@ -932,4 +924,5 @@ public class Interpreter {
 // thank you, Larry Tesler
 // realized that ^ may sound like I was copy+pasting from outside sources, I wasn't
 // some of the code (converting numbers -> colors) was repetitive, where I c+p'd a lot
+// Larry Tesler was the creator of the copy & paste commands, according to a quick Google search
 // all of this code was written by myself (Trent Freeman), and no code was taken from any outside sources

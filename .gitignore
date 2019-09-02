@@ -1,2 +1,7 @@
 /Codel.class
 /Interpreter.class
+.gradle/*
+.settings/*
+build/*
+bin/*
+.classpath
