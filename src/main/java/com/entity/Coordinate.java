@@ -30,4 +30,12 @@ public class Coordinate {
         return this.y;
     }
 
+    @Override
+    public String toString() {
+        return "{\n" +
+        "\tx = " + x + ",\n" + 
+        "\ty = " + y + "\n" +
+        "}";
+    }
+
 }

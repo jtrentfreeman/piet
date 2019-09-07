@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Interpreter",
+            "request": "launch",
+            "mainClass": "com.controller.Interpreter",
+            "projectName": "pietInterpreter",
+            "args": "C:\\Users\\frejt\\code\\pietInterpreter\\ppm\\fancyhello.ppm"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
             "mainClass": "${file}"

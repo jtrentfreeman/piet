@@ -1,11 +1,11 @@
 package com.util;
+
 import com.entity.Coordinate;
+import com.entity.Board;
 
 public class Codel {
 	private Integer size;
 	private Color color;
-	private String colorVal;
-	private String colorName;
 
 	// eight types of corner
 	private Coordinate rightTop = new Coordinate();	
@@ -17,18 +17,9 @@ public class Codel {
 	private Coordinate topLeft = new Coordinate();	
 	private Coordinate topRight = new Coordinate();
 
-	public Codel() {
-	}
-	
-	public Codel(Color color) {
-		this.color = color;
-	}
-	
-	public Codel(String[][] board) {
-		this.color = codelIntoString(colorVal);
-	}
-
-	public Codel(Coordinate coordinate) {
+	public Codel(Board board, Coordinate coordinate) {
+		System.out.println(coordinate.toString());
+		this.color = board.getColor(coordinate);
 		this.rightTop = coordinate;
 		this.rightBottom = coordinate;
 		this.bottomRight = coordinate;
@@ -59,8 +50,12 @@ public class Codel {
 		return this.color.getName();
 	}
 	
-	public Integer getColorValue() {
-		return this.color.getValue();
+	public String getHexValue() {
+		return this.color.getRBG();
+	}
+
+	public Integer getValue() {
+		return (this.color.getHue() * 10) + this.color.getLight();
 	}
 
 	public Coordinate getRightTop() {
@@ -127,12 +122,13 @@ public class Codel {
 		this.topRight = coordinate;
 	}
 
-	public void printCodel(int printLevel) {
-		if(printLevel > 3) {
-			System.out.println("\tCodel size: " + this.size);
-			System.out.println("\tCodel color value: " + this.colorVal);
-			System.out.println("\tCodel color: " + this.colorName);
-		}
+	@Override
+	public String toString() {
+		return "{\n" +
+		"\tsize = " + this.size + ",\n" +
+		"\tcolor = " + this.color.toString() + "\n" +
+		"\ttopRight: " + this.topRight.toString() + "\n" +
+		"}";
 	}
 
 	public void debugCodel() {
@@ -148,8 +144,28 @@ public class Codel {
 	}
 
 	public Color codelIntoString(String val) {
-		
-		return Enum.valueOf(Color.class, val);
+
+		System.out.println("PASSING IN " + val);
+		for(Color c : Color.values()) {
+			if(c.getRBG().equals(val)) {
+				try {
+					Thread.sleep(1000);
+					}
+					catch(InterruptedException e) {
+						System.out.println(e);
+					}
+				System.out.println("FOUND COLOR: " + c);
+				return c;
+			}
+		}
+		try {
+		Thread.sleep(1000);
+		}
+		catch(InterruptedException e) {
+			System.out.println(e);
+		}
+		return Color.WHITE;
+	
 		// switch(val)
 		// {
 		// 	case "0": return "black";			

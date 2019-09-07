@@ -2,3 +2,4 @@ Here's the things I want to do with this project:
   Incorporate into a webapp (JAX-RS API)
   Allow any photo type, jpg, png, etc, not just .ppm
   Use gradle well
+  Unit tests
