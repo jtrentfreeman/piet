@@ -1,6 +1,7 @@
 package com.util;
 
 import com.entity.Coordinate;
+import com.google.gson.GsonBuilder;
 import com.entity.Board;
 
 public class Codel {
@@ -125,11 +126,12 @@ public class Codel {
 
 	@Override
 	public String toString() {
-		return "{\n" +
-		"\tsize = " + this.size + ",\n" +
-		"\tcolor = " + this.color.toString() + "\n" +
-		"\ttopRight: " + this.topRight.toString() + "\n" +
-		"}";
+		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+		// return "{\n" +
+		// "\tsize = " + this.size + ",\n" +
+		// "\tcolor = " + this.color.toString() + "\n" +
+		// "\ttopRight: " + this.topRight.toString() + "\n" +
+		// "}";
 	}
 
 	public void debugCodel() {

@@ -10,6 +10,11 @@ import com.entity.Board;
 import com.entity.Coordinate;
 import com.entity.Metadata;
 import com.util.Director;
+
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.util.Codel;
 import com.util.Color;
 import com.util.ColorNotFoundException;
@@ -28,11 +33,18 @@ public class Interpreter {
 
 	private static boolean end = false;
 
+	private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
+
   /**
    * Takes in a .ppm file as an argument, and runs it as a Piet program
    * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
    */
 	public static void main(String[] args) throws IOException {
+
+		String log4jConfPath = "log4j.properties";
+		PropertyConfigurator.configure(log4jConfPath);
+
+		log.debug("HEYOYO");
 
 		// red -> dark blue
 		// Codel red = new Codel("11", "red");
@@ -131,6 +143,8 @@ public class Interpreter {
 		Coordinate first = new Coordinate(0, 0);
 		codels.add(new Codel(board, first));
 		codels.add(new Codel(board, first));
+
+		log.info(codels.get(0).toString());
 
 		int initSize = 1 + findSizeCodel(board, codels.get(0), first);
 		board.setVisitedAll(false);
