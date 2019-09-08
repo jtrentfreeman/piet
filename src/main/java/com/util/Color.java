@@ -1,5 +1,13 @@
 package com.util;
 
+/**
+ * Piet uses 20 distinct colours.
+ * There are 6 hues with 3 lights each, which are related cyclically as shown below, as well as white and black.
+ * Hue Cycle:
+ *   RED -> YELLOW -> GREEN -> CYAN -> BLUE -> MAGENTA -> RED
+ * Light Cycle
+ *   LIGHT -> NORMAL -> DARK -> LIGHT
+ */
 public enum Color {
     BLACK("black", 0x00, 0x00, 0x00),
     WHITE("white", 0xFF, 0xFF, 0xFF),

@@ -32,15 +32,15 @@ public class Board {
         this.setVisitedAll(false);
     }
 
-    public void setColor(Coordinate coordinate, Color color) {
+    public void setColor(Codel coordinate, Color color) {
         this.board[coordinate.getX()][coordinate.getY()] = color;
     }
 
-    public Color getColor(Coordinate coordinate) {
+    public Color getColor(Codel coordinate) {
         return this.board[coordinate.getX()][coordinate.getY()];
     }
 
-    public void setVisited(Coordinate coordinate, Boolean visited) {
+    public void setVisited(Codel coordinate, Boolean visited) {
         this.visited[coordinate.getX()][coordinate.getY()] = visited;
     }
 
@@ -53,9 +53,9 @@ public class Board {
     }
 
     /**
-     * @return true if {@link Coordinate} has been visited
+     * @return true if {@link Codel} has been visited
      */
-    public Boolean getVisited(Coordinate coordinate) {
+    public Boolean getVisited(Codel coordinate) {
         return this.visited[coordinate.getX()][coordinate.getY()];
     }
 

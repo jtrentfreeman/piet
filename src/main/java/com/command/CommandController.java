@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import com.util.Codel;
+import com.util.Block;
 import com.controller.Interpreter;
 
 public class CommandController {
@@ -17,7 +17,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> nop(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> nop(Stack<Integer> stack, Block older, Block newer) {
         return stack;
     }
 
@@ -29,7 +29,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> push(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> push(Stack<Integer> stack, Block older, Block newer) {
         Integer in = older.getSize();
         
         stack.push(in);
@@ -43,7 +43,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> pop(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> pop(Stack<Integer> stack, Block older, Block newer) {
         stack.pop();
         return stack;
     }
@@ -55,7 +55,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> add(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> add(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -71,7 +71,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> subtract(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> subtract(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -87,7 +87,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> multiply(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> multiply(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -105,7 +105,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> divide(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> divide(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
         
@@ -124,7 +124,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> modulus(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> modulus(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -141,7 +141,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> not(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> not(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         if(top == 0) {
             stack.push(1);
@@ -160,7 +160,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> greater(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> greater(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -180,7 +180,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> dp(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> dp(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Interpreter.director.rotateDP(top);
 
@@ -194,7 +194,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> cc(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> cc(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Interpreter.director.rotateCC(top);
 
@@ -208,7 +208,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> duplicate(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> duplicate(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.peek();
 
         stack.push(top);
@@ -227,7 +227,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> roll(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> roll(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
 
@@ -292,7 +292,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> inNum(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> inNum(Stack<Integer> stack, Block older, Block newer) {
         Scanner s = new Scanner(System.in);
         Integer in = s.nextInt();
         stack.push(in);
@@ -311,7 +311,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> inChar(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> inChar(Stack<Integer> stack, Block older, Block newer) {
         Scanner s = new Scanner(System.in);
         char in = s.next().charAt(0);
         int i = in;
@@ -330,7 +330,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> outNum(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> outNum(Stack<Integer> stack, Block older, Block newer) {
         Integer k = stack.pop();
         System.out.print(k);
         return stack;
@@ -344,7 +344,7 @@ public class CommandController {
      * @param newer
      * @return
      */
-    public static Stack<Integer> outChar(Stack<Integer> stack, Codel older, Codel newer) {
+    public static Stack<Integer> outChar(Stack<Integer> stack, Block older, Block newer) {
         int l = stack.pop();
         char m = (char) l;
 

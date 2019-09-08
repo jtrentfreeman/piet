@@ -1,24 +1,30 @@
 package com.util;
 
-import com.entity.Coordinate;
+import com.entity.Codel;
 import com.google.gson.GsonBuilder;
 import com.entity.Board;
 
-public class Codel {
+/**
+ * The basic unit of Piet code is the colour block. A colour block is a contiguous block of any number of codels of one colour, bounded by 
+ *   blocks of other colours of by the edge of the program graphic.
+ * Blocks of colour adjacent only diagonally are not considered contiguous.
+ * A colour block may be any shape and may have "holes" of other colours inside it, which are not considered part of the block.
+ */
+public class Block {
 	private Integer size;
 	private Color color;
 
 	// eight types of corner
-	private Coordinate rightTop = new Coordinate();	
-	private Coordinate rightBottom = new Coordinate();
-	private Coordinate bottomRight = new Coordinate();	
-	private Coordinate bottomLeft = new Coordinate();
-	private Coordinate leftBottom = new Coordinate();	
-	private Coordinate leftTop = new Coordinate();
-	private Coordinate topLeft = new Coordinate();	
-	private Coordinate topRight = new Coordinate();
+	private Codel rightTop = new Codel();	
+	private Codel rightBottom = new Codel();
+	private Codel bottomRight = new Codel();	
+	private Codel bottomLeft = new Codel();
+	private Codel leftBottom = new Codel();	
+	private Codel leftTop = new Codel();
+	private Codel topLeft = new Codel();	
+	private Codel topRight = new Codel();
 
-	public Codel(Board board, Coordinate coordinate) {
+	public Block(Board board, Codel coordinate) {
 		//System.out.println("NEW CODEL");
 		//System.out.println(coordinate.toString());
 		this.color = board.getColor(coordinate);
@@ -60,78 +66,73 @@ public class Codel {
 		return (this.color.getHue() * 10) + this.color.getLight();
 	}
 
-	public Coordinate getRightTop() {
+	public Codel getRightTop() {
 		return this.rightTop;
 	}
 
-	public void setRightTop(Coordinate coordinate) {
+	public void setRightTop(Codel coordinate) {
 		this.rightTop = coordinate;
 	}
 
-	public Coordinate getRightBottom() {
+	public Codel getRightBottom() {
 		return this.rightBottom;
 	}
 
-	public void setRightBottom(Coordinate coordinate) {
+	public void setRightBottom(Codel coordinate) {
 		this.rightBottom = coordinate;
 	}
 
-	public Coordinate getBottomRight() {
+	public Codel getBottomRight() {
 		return this.bottomRight;
 	}
 
-	public void setBottomRight(Coordinate coordinate) {
+	public void setBottomRight(Codel coordinate) {
 		this.bottomRight = coordinate;
 	}
 
-	public Coordinate getBottomLeft() {
+	public Codel getBottomLeft() {
 		return this.bottomLeft;
 	}
 
-	public void setBottomLeft(Coordinate coordinate) {
+	public void setBottomLeft(Codel coordinate) {
 		this.bottomLeft = coordinate;
 	}
 
-	public Coordinate getLeftBottom() {
+	public Codel getLeftBottom() {
 		return this.leftBottom;
 	}
 
-	public void setLeftBottom(Coordinate coordinate) {
+	public void setLeftBottom(Codel coordinate) {
 		this.leftBottom = coordinate;
 	}
 
-	public Coordinate getLeftTop() {
+	public Codel getLeftTop() {
 		return this.leftTop;
 	}
 
-	public void setLeftTop(Coordinate coordinate) {
+	public void setLeftTop(Codel coordinate) {
 		this.leftTop = coordinate;
 	}
 
-	public Coordinate getTopLeft() {
+	public Codel getTopLeft() {
 		return this.topLeft;
 	}
 
-	public void setTopLeft(Coordinate coordinate) {
+	public void setTopLeft(Codel coordinate) {
 		this.topLeft = coordinate;
 	}
 
-	public Coordinate getTopRight() {
+	public Codel getTopRight() {
 		return this.topRight;
 	}
 
-	public void setTopRight(Coordinate coordinate) {
+	public void setTopRight(Codel coordinate) {
 		this.topRight = coordinate;
 	}
 
 	@Override
 	public String toString() {
 		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
-		// return "{\n" +
-		// "\tsize = " + this.size + ",\n" +
-		// "\tcolor = " + this.color.toString() + "\n" +
-		// "\ttopRight: " + this.topRight.toString() + "\n" +
-		// "}";
 	}
 
 	public void debugCodel() {

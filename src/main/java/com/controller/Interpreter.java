@@ -1,23 +1,27 @@
 package com.controller;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Stack;
 
 import com.command.Command;
+import com.director.Director;
 import com.entity.Board;
-import com.entity.Coordinate;
+import com.entity.Codel;
 import com.entity.Metadata;
-import com.util.Director;
+import com.util.Block;
+import com.util.Color;
+import com.util.ColorNotFoundException;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.util.Codel;
-import com.util.Color;
-import com.util.ColorNotFoundException;
 
 public class Interpreter {
 
@@ -29,61 +33,48 @@ public class Interpreter {
 
 	public static Director director = new Director();
 
+	/**
+	 * Piet uses a stack for storage of all data values. Data values exist only as integers, though they may be read in or printed as 
+	 *   Unicode character values wi1th appropriate commands.
+	 * The stack is nottionally infinitely deep, but implementations may elect to provide a finite maximum stack size.
+	 * If a finite stack overflows, it should be treated as a runtime error, and handling this will be implementation dependent.
+	 */
 	private static Stack<Integer> stack = new Stack<>();
 
 	private static boolean end = false;
 
 	private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
 
-  /**
-   * Takes in a .ppm file as an argument, and runs it as a Piet program
-   * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html
-   */
+    /**
+	 * Takes in a .ppm file as an argument, and runs it as a Piet program
+     * The Piet program is described at http://www.dangermouse.net/esoteric/piet.html 
+	 * 
+     * @param args
+	 *   args[0] - the file to run
+     * @throws IOException
+     */
 	public static void main(String[] args) throws IOException {
 
 		String log4jConfPath = "log4j.properties";
 		PropertyConfigurator.configure(log4jConfPath);
 
-		log.debug("HEYOYO");
-
-		// red -> dark blue
-		// Codel red = new Codel("11", "red");
-		// Codel dbl = new Codel("52", "dark blue");
-		// stack.push(10); stack.push(100); stack.push(108); stack.push(108); stack.push(3); stack.push(3); stack.push(3); stack.push(2);
-		// getCommand(red, dbl);
-
-		String runFile = args[0];
+		String runFile = null;
 		Scanner sc;
 
-		if(args.length == 0 && runFile == null) {
+		if(args.length > 0) {
+			runFile = args[0];
+		} else if(runFile == null) {
 			System.err.println("Please enter a .ppm file to run.");
 			sc = new Scanner(System.in);
 			runFile = sc.nextLine();
 		}
 
-		// input file is passed in as an argument, guess it could be passed in without the .extension
-		File oldfile = new File(runFile);
-
-		// size of each block in the .ppm file, 1 implies 1 pixel -> 1 block, 4 implies 4 pix -> 1 block
-		if(args.length > 1) {
-			sizePix = Integer.parseInt(args[1]);
-		}
-
-		String firstBit = oldfile.getPath().split("\\.")[0];
-		File newfile = new File(firstBit + ".txt");
-
-		// here we're renaming it in order to get the colors as an RGB trio
-		oldfile.renameTo(newfile);
-
 		// Board board = fileToBoard("tmp.txt");
-		Path tmpFile = Paths.get(args[0]);
+		Path tmpFile = Paths.get(runFile);
 		Board board = readFile(tmpFile);
-		//System.out.println("THE BOARD");
-		//System.out.println(board);
-
-		// want our original file back
-		File endfile = new File(firstBit + ".ppm");
-		newfile.renameTo(endfile);
+		
+		log.debug("THE BOARD");
+		log.debug(board.toString());
 
 		// performing the actual file
 		readBoard(board);
@@ -91,7 +82,7 @@ public class Interpreter {
 
 	/**
 	 * Takes in a .ppm file and converts it into a {@link Board}
-	 * @param file
+	 * @param path - path to the file to be read
 	 */
 	public static Board readFile(Path path) {
 		Board board;
@@ -116,7 +107,7 @@ public class Interpreter {
 
 					try {
 						Color color = Color.getColorFromValues(red, blue, green);
-						Coordinate coordinate = new Coordinate(i, j);
+						Codel coordinate = new Codel(i, j);
 						board.setColor(coordinate, color);
 					} catch(ColorNotFoundException e) {
 						e.printStackTrace();
@@ -126,65 +117,67 @@ public class Interpreter {
 
 			return board;
 		} catch (FileNotFoundException e) {
-			//System.out.println(e);
+			log.info(e.toString());
 			System.exit(0);
 			return null;
 		}
 	}
 
-	// by now we've read in the file and pass it in as board
+	/**
+	 * Given a {@link Board} holding a grid of {@link Block}, move through the board and perform the commands
+	 * @param board
+	 */
 	public static void readBoard(Board board) {
-		//System.out.println("STARTING TO READ BOARD");
+		log.debug("STARTING TO READ BOARD");
 
-		List<Codel> codels = new ArrayList<>();
-		// Codel[] codels = new Codel[2];
+		List<Block> blocks = new ArrayList<>();
 
 		// initiate the very first Codel
-		Coordinate first = new Coordinate(0, 0);
-		codels.add(new Codel(board, first));
-		codels.add(new Codel(board, first));
+		Codel first = new Codel(0, 0);
+		blocks.add(new Block(board, first));
+		blocks.add(new Block(board, first));
 
-		log.info(codels.get(0).toString());
+		log.debug(blocks.get(0).toString());
 
-		int initSize = 1 + findSizeCodel(board, codels.get(0), first);
+		int initSize = 1 + findSizeCodel(board, blocks.get(0), first);
 		board.setVisitedAll(false);
 
-		codels.get(0).setSize(initSize);
-//		codels[0].printCodel();
+		blocks.get(0).setSize(initSize);
+		log.debug(blocks.get(0).toString());
 
 		// the program will end on it's own (hypothetically)
 		while(!end) {
 
-			codels.set(0, codels.get(1));
-			codels.remove(1);
+			blocks.set(0, blocks.get(1));
+			blocks.remove(1);
 
 			// get the coords of the next Codel
-			Coordinate nextBlock = getNextBlock(board, codels.get(0), 0);
+			Codel nextBlock = getNextBlock(board, blocks.get(0), 0);
 
 			// initiate the newest Codel
-			codels.add(new Codel(board, nextBlock));
-			initSize = 1 + findSizeCodel(board, codels.get(1), nextBlock);
+			blocks.add(new Block(board, nextBlock));
+			initSize = 1 + findSizeCodel(board, blocks.get(1), nextBlock);
 			board.setVisitedAll(false);
 
-			codels.get(1).setSize(initSize);
+			blocks.get(1).setSize(initSize);
 			//System.out.println(codels.get(1).toString());
 			//System.out.println("DP = " + director.getDP() + " \tCC = " + director.getCC());
 
 			// white codels act as a nop, meaning they don't go into the queue at all
-			if(codels.get(1).getColor().equals(Color.WHITE)) {
+			if(blocks.get(1).getColor().equals(Color.WHITE)) {
 				//System.out.println("FOUND A WHITE CODEL");
-				Coordinate nextNonWhite = getNextBlockWhite(board, codels.get(1), nextBlock, 0);
-				codels.set(0, new Codel(board, nextNonWhite));
-				codels.get(0).setSize(1+findSizeCodel(board, codels.get(1), nextNonWhite));
+				Codel nextNonWhite = getNextBlockWhite(board, blocks.get(1), nextBlock, 0);
+				blocks.set(0, new Block(board, nextNonWhite));
+				blocks.get(0).setSize(1+findSizeCodel(board, blocks.get(1), nextNonWhite));
 				
 				board.setVisitedAll(false);
 			}
 			else { 
 				// perform the command given by the two Codel's
-				getCommand(codels.get(0), codels.get(1));
+				getCommand(blocks.get(0), blocks.get(1));
 
 				//  shift the new Codel to the old one's spot
-				codels.set(0, codels.get(1));
+				blocks.set(0, blocks.get(1));
 
 				//  if I want to print the stack for debuggin and slow down time
 				//System.out.println(stack.toString());
@@ -200,7 +193,7 @@ public class Interpreter {
 	}
 
 	//  
-	public static int findSizeCodel(Board board, Codel c, Coordinate coord) { 
+	public static int findSizeCodel(Board board, Block c, Codel coord) { 
 		// codel is uninitiated, so I need to set its corners
 		if(c.getRightTop().getX() == -1) {
 			setCorners(c, coord);
@@ -210,17 +203,17 @@ public class Interpreter {
 		board.setVisited(coord, true);
 
 		// 4 directions the program will search in for more of the same color
-		Coordinate newCoordinate = new Coordinate();
+		Codel newCoordinate = new Codel();
 		for(int i = 0; i < 4; i++)
 		{
 			if(i == 0)
-				newCoordinate = new Coordinate(coord.getX(), coord.getY()-1);
+				newCoordinate = new Codel(coord.getX(), coord.getY()-1);
 			else if(i == 1)
-				newCoordinate = new Coordinate(coord.getX(), coord.getY()+1);
+				newCoordinate = new Codel(coord.getX(), coord.getY()+1);
 			else if(i == 2)
-				newCoordinate = new Coordinate(coord.getX()-1, coord.getY());
+				newCoordinate = new Codel(coord.getX()-1, coord.getY());
 			else if(i == 3)
-				newCoordinate = new Coordinate(coord.getX()+1, coord.getY());
+				newCoordinate = new Codel(coord.getX()+1, coord.getY());
 
 			// gonna skip this block if it's out of the board or visited
 			if(!inBounds(board, newCoordinate)) {
@@ -242,19 +235,16 @@ public class Interpreter {
 	}
 
 	// Here, col1 represents the last color, col2 is the newest color
-	public static void getCommand(Codel cod1, Codel cod2) {
+	public static void getCommand(Block older, Block newer) {
 
-		Integer hue1 = cod1.getColor().getHue();
-		Integer light1 = cod1.getColor().getLight();
+		Integer hue1 = older.getColor().getHue();
+		Integer light1 = older.getColor().getLight();
 
-		Integer hue2 = cod2.getColor().getHue();
-		Integer light2 = cod2.getColor().getLight();
+		Integer hue2 = newer.getColor().getHue();
+		Integer light2 = newer.getColor().getLight();
 		
 		Integer hueChange = hue2 - hue1;
-		//System.out.println("change in light: " + light1 + " - " + light2);
-		//System.out.println(light2 - light1);
 		Integer lightChange = light2 - light1;
-		//System.out.println(lightChange);
 
 		while(hueChange < 0) {
 			hueChange += 6;
@@ -263,15 +253,14 @@ public class Interpreter {
 			lightChange += 3;
 		}
 
-		//System.out.println("Got command");
 		Command command = Command.getCommand(hueChange, lightChange);
-		stack = command.calculate(stack, cod1, cod2);
-		//System.out.println("Command calculated");
+		log.debug(command.getName());
+		stack = command.calculate(stack, older, newer);
 		return;
 	}
 
 	// Piet relies entirely on moving from a corner to a new color, need to set two corners (l, r) for each direction (l, r, u, d)
-	public static void setCorners(Codel c, Coordinate coordinate) {
+	public static void setCorners(Block c, Codel coordinate) {
 
 		// potential for new right column value
 		if(coordinate.getY() >= c.getRightTop().getY() || c.getRightTop().getY() == -1) {
@@ -356,17 +345,17 @@ public class Interpreter {
 	}
 
 	// return whether the point will be in bounds
-	public static boolean inBounds(Board board, Coordinate coordinate) {
+	public static boolean inBounds(Board board, Codel coordinate) {
 		return ((coordinate.getX() >= 0) && coordinate.getX() < board.getSizeRow()) && 
 			(coordinate.getY() >= 0 && (coordinate.getY() < board.getSizeCol()));
 	}
 
 	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
-	public static Coordinate getNextBlockWhite(Board board, Codel c, Coordinate coordinate, int attempt ) {
+	public static Codel getNextBlockWhite(Board board, Block c, Codel coordinate, int attempt ) {
 
 		int nextRow = coordinate.getX();
 		int nextCol = coordinate.getY();
-		Coordinate next = new Coordinate(nextRow, nextCol);
+		Codel next = new Codel(nextRow, nextCol);
 
 
 		// moving in a straight line, unless it goes out of bounds or hits a black box
@@ -374,11 +363,11 @@ public class Interpreter {
 			case RIGHT:
 				while(board.getColor(coordinate) == Color.WHITE) {
 					//System.out.println("new val is " + board.getColor(coordinate) + " at " + coordinate.getX() + " " + coordinate.getY());
-					if(!inBounds(board, new Coordinate(nextRow, nextCol+1))) {
+					if(!inBounds(board, new Codel(nextRow, nextCol+1))) {
 						//System.out.println("Rotating here @ right: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
-					} else if(board.getColor(new Coordinate(nextRow, nextCol+1)) == Color.BLACK) {
+					} else if(board.getColor(new Codel(nextRow, nextCol+1)) == Color.BLACK) {
 						//System.out.println("Rotating here2 @ right: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
@@ -390,11 +379,11 @@ public class Interpreter {
 				break;
 			case LEFT:
 				while(board.getColor(next) == Color.WHITE) {
-					if(!inBounds(board, new Coordinate(nextRow, nextCol-1))) {
+					if(!inBounds(board, new Codel(nextRow, nextCol-1))) {
 						//System.out.println("Rotating here @ left: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
-					} else if(board.getColor(new Coordinate(nextRow, nextCol-1)) == Color.BLACK) {
+					} else if(board.getColor(new Codel(nextRow, nextCol-1)) == Color.BLACK) {
 						//System.out.println("Rotating here2 @ left: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
@@ -405,11 +394,11 @@ public class Interpreter {
 				break;
 			case DOWN:
 				while(board.getColor(next) == Color.WHITE) {
-					if(!inBounds(board, new Coordinate(nextRow+1, nextCol))) {
+					if(!inBounds(board, new Codel(nextRow+1, nextCol))) {
 						//System.out.println("Rotating here @ down: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
-					} else if(board.getColor(new Coordinate(nextRow+1, nextCol)) == Color.BLACK) {
+					} else if(board.getColor(new Codel(nextRow+1, nextCol)) == Color.BLACK) {
 						//System.out.println("Rotating here2 @ down: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
@@ -420,11 +409,11 @@ public class Interpreter {
 				break;
 			case UP:
 				while(board.getColor(next) == Color.WHITE) {
-					if(!inBounds(board, new Coordinate(nextRow-1, nextCol))) {
+					if(!inBounds(board, new Codel(nextRow-1, nextCol))) {
 						//System.out.println("Rotating here @ up: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
-					} else if(board.getColor(new Coordinate(nextRow-1, nextCol)) == Color.BLACK) {
+					} else if(board.getColor(new Codel(nextRow-1, nextCol)) == Color.BLACK) {
 						//System.out.println("Rotating here2 @ up: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
@@ -435,12 +424,12 @@ public class Interpreter {
 				break;
 		}
 
-		Coordinate nextCoord = new Coordinate(nextRow, nextCol);
+		Codel nextCoord = new Codel(nextRow, nextCol);
 		return nextCoord;
 	}
 
 	// we're getting the newest codel, from the old one, c
-	public static Coordinate getNextBlock(Board board, Codel c, int attempt) {
+	public static Codel getNextBlock(Board board, Block c, int attempt) {
 
 		//System.out.println("PREVIOUS CODEL: " + c.toString());
 
@@ -453,7 +442,7 @@ public class Interpreter {
 			return null;
 		}
 
-		Coordinate next = new Coordinate(0, 0);
+		Codel next = new Codel(0, 0);
 		switch(director.getDP()) {
 			// if we're going right
 			case RIGHT:
