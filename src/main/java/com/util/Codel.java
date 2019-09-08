@@ -18,7 +18,8 @@ public class Codel {
 	private Coordinate topRight = new Coordinate();
 
 	public Codel(Board board, Coordinate coordinate) {
-		System.out.println(coordinate.toString());
+		//System.out.println("NEW CODEL");
+		//System.out.println(coordinate.toString());
 		this.color = board.getColor(coordinate);
 		this.rightTop = coordinate;
 		this.rightBottom = coordinate;
@@ -132,37 +133,36 @@ public class Codel {
 	}
 
 	public void debugCodel() {
-		System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop.getX() + ", " + this.rightTop.getY());
-		System.out.println("\tCodel's right-most & lower-most block is at " + this.rightBottom.getX() + ", " + this.rightBottom.getY());
-		System.out.println("\tCodel's bottom-most & right-most block is at " + this.bottomRight.getX() + ", " + this.bottomRight.getY());
-		System.out.println("\tCodel's bottom-most & left-most block is at " + this.bottomLeft.getX() + ", " + this.bottomLeft.getY());
-		System.out.println("\tCodel's left-most & bottom-most block is at " + this.leftBottom.getX() + ", " + this.leftBottom.getY());
-		System.out.println("\tCodel's left-most & top-most block is at " + this.leftTop.getX() + ", " + this.leftTop.getY());
-		System.out.println("\tCodel's upper-most & left-most block is at " + this.topLeft.getX() + ", " + this.topLeft.getY());
-		System.out.println("\tCodel's upper-most & right-most block is at " + this.topRight.getX()+ ", " + this.topRight.getY());
-		System.out.println();
+		//System.out.println("\tCodel's right-most & upper-most block is at " + this.rightTop.getX() + ", " + this.rightTop.getY());
+		//System.out.println("\tCodel's right-most & lower-most block is at " + this.rightBottom.getX() + ", " + this.rightBottom.getY());
+		//System.out.println("\tCodel's bottom-most & right-most block is at " + this.bottomRight.getX() + ", " + this.bottomRight.getY());
+		//System.out.println("\tCodel's bottom-most & left-most block is at " + this.bottomLeft.getX() + ", " + this.bottomLeft.getY());
+		//System.out.println("\tCodel's left-most & bottom-most block is at " + this.leftBottom.getX() + ", " + this.leftBottom.getY());
+		//System.out.println("\tCodel's left-most & top-most block is at " + this.leftTop.getX() + ", " + this.leftTop.getY());
+		//System.out.println("\tCodel's upper-most & left-most block is at " + this.topLeft.getX() + ", " + this.topLeft.getY());
+		//System.out.println("\tCodel's upper-most & right-most block is at " + this.topRight.getX()+ ", " + this.topRight.getY());
+		//System.out.println();
 	}
 
 	public Color codelIntoString(String val) {
-
-		System.out.println("PASSING IN " + val);
+		//System.out.println("PASSING IN " + val);
 		for(Color c : Color.values()) {
 			if(c.getRBG().equals(val)) {
 				try {
 					Thread.sleep(1000);
 					}
 					catch(InterruptedException e) {
-						System.out.println(e);
+						//System.out.println(e);
 					}
-				System.out.println("FOUND COLOR: " + c);
+				//System.out.println("FOUND COLOR: " + c);
 				return c;
 			}
 		}
 		try {
-		Thread.sleep(1000);
+			Thread.sleep(1000);
 		}
 		catch(InterruptedException e) {
-			System.out.println(e);
+			//System.out.println(e);
 		}
 		return Color.WHITE;
 	

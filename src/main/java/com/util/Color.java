@@ -95,7 +95,7 @@ public enum Color {
      * @param name
      * @return
      */
-    public Integer setLightFromName(String name) {
+    public Integer setHueFromName(String name) {
         if(name.contains("red")) {
             return 0;
         } else if(name.contains("yellow")) {
@@ -117,7 +117,7 @@ public enum Color {
      * @param name
      * @return
      */
-    public Integer setHueFromName(String name) {
+    public Integer setLightFromName(String name) {
         if(name.contains("light")) {
             return 0;
         } else if(name.contains("dark")) {

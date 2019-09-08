@@ -20,9 +20,16 @@ public class Board {
     Color[][] board;
     Boolean[][] visited;
 
+    private Integer sizeRow;
+    private Integer sizeCol;
+
     public Board(int sizeRow, int sizeCol) {
+        this.sizeRow = sizeRow;
+        this.sizeCol = sizeCol;
+
         board = new Color[sizeRow][sizeCol];
         visited = new Boolean[sizeRow][sizeCol];
+        this.setVisitedAll(false);
     }
 
     public void setColor(Coordinate coordinate, Color color) {
@@ -49,7 +56,15 @@ public class Board {
      * @return true if {@link Coordinate} has been visited
      */
     public Boolean getVisited(Coordinate coordinate) {
-        return visited[coordinate.getX()][coordinate.getY()];
+        return this.visited[coordinate.getX()][coordinate.getY()];
+    }
+
+    public Integer getSizeRow() {
+        return this.sizeRow;
+    }
+
+    public Integer getSizeCol() {
+        return this.sizeCol;
     }
 
     @Override
