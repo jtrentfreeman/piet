@@ -1,4 +1,4 @@
-package com.util;
+package com.exception;
 
 public class ColorNotFoundException extends Exception {
 

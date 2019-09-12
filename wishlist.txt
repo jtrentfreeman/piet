@@ -1,5 +1,9 @@
 Here's the things I want to do with this project:
   Incorporate into a webapp (JAX-RS API)
+    Users could:
+      Follow the stack trace of a piet program
+      Give input that would turn into a piet program
+        Users could constantly regenerate different random programs that would output that input
   Allow any photo type, jpg, png, etc, not just .ppm
   Use gradle well
   Unit tests

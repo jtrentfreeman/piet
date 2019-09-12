@@ -17,7 +17,7 @@ import com.entity.Codel;
 import com.entity.Metadata;
 import com.util.Block;
 import com.util.Color;
-import com.util.ColorNotFoundException;
+import com.exception.ColorNotFoundException;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -40,6 +40,11 @@ public class Interpreter {
 	 * If a finite stack overflows, it should be treated as a runtime error, and handling this will be implementation dependent.
 	 */
 	private static Stack<Integer> stack = new Stack<>();
+
+	/**
+	 * Helps keep track of the commands that have taken place 
+	 */
+	private static List<Command> commandList = new ArrayList<>();
 
 	private static boolean end = false;
 
@@ -117,6 +122,7 @@ public class Interpreter {
 
 			return board;
 		} catch (FileNotFoundException e) {
+			log.info("???");
 			log.info(e.toString());
 			System.exit(0);
 			return null;
@@ -134,16 +140,15 @@ public class Interpreter {
 
 		// initiate the very first Codel
 		Codel first = new Codel(0, 0);
-		blocks.add(new Block(board, first));
-		blocks.add(new Block(board, first));
 
-		log.debug(blocks.get(0).toString());
+		Block initBlock = new Block(board, first);
+		initBlock.setSize(1 + findSizeCodel(board, initBlock, first));;
 
-		int initSize = 1 + findSizeCodel(board, blocks.get(0), first);
+		int size;
 		board.setVisitedAll(false);
 
-		blocks.get(0).setSize(initSize);
-		log.debug(blocks.get(0).toString());
+		blocks.add(initBlock);
+		blocks.add(initBlock);
 
 		// the program will end on it's own (hypothetically)
 		while(!end) {
@@ -156,16 +161,13 @@ public class Interpreter {
 
 			// initiate the newest Codel
 			blocks.add(new Block(board, nextBlock));
-			initSize = 1 + findSizeCodel(board, blocks.get(1), nextBlock);
+			size = 1 + findSizeCodel(board, blocks.get(1), nextBlock);
 			board.setVisitedAll(false);
 
-			blocks.get(1).setSize(initSize);
-			//System.out.println(codels.get(1).toString());
-			//System.out.println("DP = " + director.getDP() + " \tCC = " + director.getCC());
+			blocks.get(1).setSize(size);
 
 			// white codels act as a nop, meaning they don't go into the queue at all
 			if(blocks.get(1).getColor().equals(Color.WHITE)) {
-				//System.out.println("FOUND A WHITE CODEL");
 				Codel nextNonWhite = getNextBlockWhite(board, blocks.get(1), nextBlock, 0);
 				blocks.set(0, new Block(board, nextNonWhite));
 				blocks.get(0).setSize(1+findSizeCodel(board, blocks.get(1), nextNonWhite));
@@ -178,16 +180,6 @@ public class Interpreter {
 
 				//  shift the new Codel to the old one's spot
 				blocks.set(0, blocks.get(1));
-
-				//  if I want to print the stack for debuggin and slow down time
-				//System.out.println(stack.toString());
-				try {
-					if(printLevel > 0) {
-						Thread.sleep(100);
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 	}
@@ -255,6 +247,10 @@ public class Interpreter {
 
 		Command command = Command.getCommand(hueChange, lightChange);
 		log.debug(command.getName());
+		log.debug(stack.toString());
+		log.debug(older.toString());
+		log.debug(newer.toString());
+		commandList.add(command);
 		stack = command.calculate(stack, older, newer);
 		return;
 	}
@@ -344,8 +340,13 @@ public class Interpreter {
 		}
 	}
 
-	// return whether the point will be in bounds
-	public static boolean inBounds(Board board, Codel coordinate) {
+	/**
+	 * Return whether the Codel will be within the bounds of the board
+	 * @param board
+	 * @param coordinate
+	 * @return
+	 */
+	public static Boolean inBounds(Board board, Codel coordinate) {
 		return ((coordinate.getX() >= 0) && coordinate.getX() < board.getSizeRow()) && 
 			(coordinate.getY() >= 0 && (coordinate.getY() < board.getSizeCol()));
 	}
@@ -362,13 +363,10 @@ public class Interpreter {
 		switch(director.getDP()) {
 			case RIGHT:
 				while(board.getColor(coordinate) == Color.WHITE) {
-					//System.out.println("new val is " + board.getColor(coordinate) + " at " + coordinate.getX() + " " + coordinate.getY());
 					if(!inBounds(board, new Codel(nextRow, nextCol+1))) {
-						//System.out.println("Rotating here @ right: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(board.getColor(new Codel(nextRow, nextCol+1)) == Color.BLACK) {
-						//System.out.println("Rotating here2 @ right: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
@@ -380,11 +378,9 @@ public class Interpreter {
 			case LEFT:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow, nextCol-1))) {
-						//System.out.println("Rotating here @ left: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(board.getColor(new Codel(nextRow, nextCol-1)) == Color.BLACK) {
-						//System.out.println("Rotating here2 @ left: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
@@ -395,11 +391,9 @@ public class Interpreter {
 			case DOWN:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow+1, nextCol))) {
-						//System.out.println("Rotating here @ down: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(board.getColor(new Codel(nextRow+1, nextCol)) == Color.BLACK) {
-						//System.out.println("Rotating here2 @ down: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
@@ -410,11 +404,9 @@ public class Interpreter {
 			case UP:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow-1, nextCol))) {
-						//System.out.println("Rotating here @ up: ");
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
 					} else if(board.getColor(new Codel(nextRow-1, nextCol)) == Color.BLACK) {
-						//System.out.println("Rotating here2 @ up: ");
 						director.rotateCC(1);
 						director.rotateDP(1);
 						return getNextBlockWhite(board, c, coordinate, attempt);
@@ -424,21 +416,17 @@ public class Interpreter {
 				break;
 		}
 
-		Codel nextCoord = new Codel(nextRow, nextCol);
-		return nextCoord;
+		return new Codel(nextRow, nextCol);
 	}
 
 	// we're getting the newest codel, from the old one, c
 	public static Codel getNextBlock(Board board, Block c, int attempt) {
 
-		//System.out.println("PREVIOUS CODEL: " + c.toString());
-
 		// we've tried every orientation and can't find a new Codel
-		//System.out.println("ATTEMPT #" + attempt);
 		if(attempt > 8) {
-			//System.out.println("DONE");
 			end = true;
-			//System.out.println("NEW COORD(0, 0)");
+			System.out.println("DONE");
+			System.exit(0);
 			return null;
 		}
 
@@ -460,8 +448,6 @@ public class Interpreter {
 
 				// TODO: what is attempt doing here? maybe bug
 				if(!inBounds(board, next) || board.getColor(next) == Color.BLACK) {
-					//System.out.println("Not in bounds and next color is black?");
-					//System.out.println("Maybe rotate DP");
 					if(attempt % 2 == 0) {
 						director.rotateCC(1);
 					} else {
@@ -484,7 +470,6 @@ public class Interpreter {
 				next.setX(next.getX() + 1);
 
 				if(!inBounds(board, next) || board.getColor(next) == Color.BLACK) {
-					//System.out.println("Rotating here @ up: ");
 					if(attempt % 2 == 0) {
 						director.rotateCC(1);
 					} else {
@@ -507,7 +492,6 @@ public class Interpreter {
 				next.setY(next.getY() - 1);
 
 				if(!inBounds(board, next) || board.getColor(next) == Color.BLACK) {
-					//System.out.println("Rotating here @ up: ");
 					if(attempt % 2 == 0) {
 						director.rotateCC(1);
 					} else {
@@ -530,13 +514,12 @@ public class Interpreter {
 				next.setX(next.getX() - 1);
 
 				if(!inBounds(board, next) || board.getColor(next) == Color.BLACK) {
-					//System.out.println("Rotating here @ up: ");
 					if(attempt % 2 == 0) {
 						director.rotateCC(1);
 					} else {
 						director.rotateDP(1);
 					}
-					next.setX(next.getX() - 1);
+					next.setX(next.getX() + 1);
 					return getNextBlock(board, c, attempt + 1);
 				}
 				break;

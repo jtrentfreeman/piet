@@ -1,5 +1,8 @@
 package com.util;
 
+import com.exception.ColorNotFoundException;
+import com.google.gson.GsonBuilder;
+
 /**
  * Piet uses 20 distinct colours.
  * There are 6 hues with 3 lights each, which are related cyclically as shown below, as well as white and black.
@@ -53,7 +56,6 @@ public enum Color {
         this.rgb = Color.getColorFromRGB(red, green, blue);
         this.hue = setHueFromName(name);
         this.light = setLightFromName(name);
-        // System.out.println(this.toString());
     }
 
     public String getName() {
@@ -84,22 +86,15 @@ public enum Color {
         return this.light;
     }
 
-    
+    /**
+     * Returns a json string representation of the Java object
+     */
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(
-            "{\n" +
-            "\tname: " + this.name + "\n" +
-            "\trgb: " + this.rgb + "\n" +
-            "\thue: " + this.hue + "\n" +
-            "\tlight: " + this.light + "\n" +
-            "}"
-        );
-        return str.toString();
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
     /**
-     * 
+     * Given a color name, return its hue level
      * @param name
      * @return
      */
@@ -121,7 +116,7 @@ public enum Color {
     }
 
     /**
-     * 
+     * Given a color name, return it lightness level
      * @param name
      * @return
      */
@@ -136,7 +131,7 @@ public enum Color {
     }
 
     /**
-     * 
+     * Given a red, green, and blue value (0-255), returns the {@link Color} matching those values
      * @param red
      * @param green
      * @param blue
@@ -156,7 +151,7 @@ public enum Color {
     }
 
     /**
-     * 
+     * Converts RGB (0-255) values into a hex string representing it
      * @param red
      * @param green
      * @param blue
