@@ -154,8 +154,10 @@ public class Interpreter {
 		// the program will end on it's own (hypothetically)
 		while(!end) {
 
-			blocks.set(0, blocks.get(1));
-			blocks.remove(1);
+			if(blocks.size() > 1) {
+				blocks.set(0, blocks.get(1));
+				blocks.remove(1);
+			}
 
 			// get the coords of the next Codel
 			Codel nextBlock = getNextBlock(board, blocks.get(0), 0);
@@ -171,7 +173,8 @@ public class Interpreter {
 			if(blocks.get(1).getColor().equals(Color.WHITE)) {
 				Codel nextNonWhite = getNextBlockWhite(board, blocks.get(1), nextBlock, 0);
 				blocks.set(0, new Block(board, nextNonWhite));
-				blocks.get(0).setSize(1+findSizeCodel(board, blocks.get(1), nextNonWhite));
+				blocks.get(0).setSize(1+findSizeCodel(board, blocks.get(0), nextNonWhite));
+				blocks.remove(1);
 				
 				board.setVisitedAll(false);
 			}
@@ -183,6 +186,8 @@ public class Interpreter {
 				blocks.set(0, blocks.get(1));
 			}
 		}
+
+		log.info("DONE");
 	}
 
 	//  
@@ -247,12 +252,10 @@ public class Interpreter {
 		}
 
 		Command command = Command.getCommand(hueChange, lightChange);
-		log.debug(command.getName());
-		log.debug(stack.toString());
-		log.debug(older.toString());
-		log.debug(newer.toString());
 		commandList.add(command);
 		stack = command.calculate(stack, older, newer);
+		log.debug("{} \t {}. {} \t\t {}", String.format("%14s", newer.getCoords()), String.format("%3s", commandList.size()), 
+										  String.format("%10s", command.toString()), stack.toString());
 		return;
 	}
 
@@ -358,14 +361,13 @@ public class Interpreter {
 		// we've tried every orientation and can't find a new Codel
 		if(attempt > 8) {
 			end = true;
-			System.out.println("DONE");
+			log.debug("DONE");
 			System.exit(0);
 			return null;
 		}
 
 		Codel next = new Codel(0, 0);
 		switch(director.getDP()) {
-			// if we're going right
 			case RIGHT:
 				switch(director.getCC()) {
 					// we want to start from the right-top
@@ -462,7 +464,7 @@ public class Interpreter {
 	}
 
 	// the interpreter moves in a straight line when fed a white block, as opposed to a colored block
-	public static Codel getNextBlockWhite(Board board, Block c, Codel coordinate, int attempt ) {
+	public static Codel getNextBlockWhite(Board board, Block c, Codel coordinate, int attempt) {
 
 		int nextRow = coordinate.getX();
 		int nextCol = coordinate.getY();
@@ -471,61 +473,68 @@ public class Interpreter {
 		// moving in a straight line, unless it goes out of bounds or hits a black box
 		switch(director.getDP()) {
 			case RIGHT:
-				while(board.getColor(coordinate) == Color.WHITE) {
+				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow, nextCol+1))) {
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow, nextCol + 1), attempt);
 					} else if(board.getColor(new Codel(nextRow, nextCol+1)) == Color.BLACK) {
 						director.rotateCC(1);
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow, nextCol + 1), attempt);
 					}
-
-					next.setX(nextCol++);
+					
+					nextCol++;
+					next.setY(nextCol);
 				}
 				break;
 			case LEFT:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow, nextCol-1))) {
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow, nextCol - 1), attempt);
 					} else if(board.getColor(new Codel(nextRow, nextCol-1)) == Color.BLACK) {
 						director.rotateCC(1);
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow, nextCol - 1), attempt);
 					}
+
 					nextCol--;
+					next.setY(nextCol);
 				}
 				break;
 			case DOWN:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow+1, nextCol))) {
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow + 1, nextCol), attempt);
 					} else if(board.getColor(new Codel(nextRow+1, nextCol)) == Color.BLACK) {
 						director.rotateCC(1);
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow + 1, nextCol), attempt);
 					}
+
 					nextRow++;
+					next.setX(nextRow);
 				}
 				break;
 			case UP:
 				while(board.getColor(next) == Color.WHITE) {
 					if(!inBounds(board, new Codel(nextRow-1, nextCol))) {
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow - 1, nextCol), attempt);
 					} else if(board.getColor(new Codel(nextRow-1, nextCol)) == Color.BLACK) {
 						director.rotateCC(1);
 						director.rotateDP(1);
-						return getNextBlockWhite(board, c, coordinate, attempt);
+						return getNextBlockWhite(board, c, new Codel(nextRow - 1, nextCol), attempt);
 					}
+
 					nextRow--;
+					next.setX(nextRow);
 				}
 				break;
 		}
 
-		return new Codel(nextRow, nextCol);
+		return next;
 	}
 }
 

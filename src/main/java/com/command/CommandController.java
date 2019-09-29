@@ -108,8 +108,10 @@ public class CommandController {
     public static Stack<Integer> divide(Stack<Integer> stack, Block older, Block newer) {
         Integer top = stack.pop();
         Integer bottom = stack.pop();
-        
-        stack.push(bottom / top);
+
+        if(top != 0) {       
+            stack.push(bottom / top);
+        }
 
         return stack;
     }
@@ -170,7 +172,7 @@ public class CommandController {
             stack.push(0);
         }
 
-        return null;
+        return stack;
     }
 
     /**
@@ -195,7 +197,12 @@ public class CommandController {
      * @return
      */
     public static Stack<Integer> cc(Stack<Integer> stack, Block older, Block newer) {
-        Integer top = stack.pop();
+        Integer top;
+        if(stack.size() > 0) {
+            top = stack.pop();
+        } else {
+            top = 0;
+        }
         Interpreter.director.rotateCC(top);
 
         return stack;

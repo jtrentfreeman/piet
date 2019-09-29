@@ -38,7 +38,7 @@ public class Director {
     }
 
     public void rotateCC(Integer val) {
-        if(CommandController.correctMod(val, 2) == 2) {
+        if(CommandController.correctMod(val, 2) == 0) {
             return;
         } else {
             if(this.cc == CC.RIGHT) {

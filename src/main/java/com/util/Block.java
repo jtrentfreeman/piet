@@ -140,6 +140,10 @@ public class Block {
 		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
 	}
 
+	public String getCoords() {
+		return "[x: " + topRight.getX() + ", y: " + topRight.getY() + "]";
+	}
+
 	public Color codelIntoString(String val) {
 		for(Color c : Color.values()) {
 			if(c.getRBG().equals(val)) {

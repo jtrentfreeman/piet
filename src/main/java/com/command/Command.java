@@ -2,6 +2,7 @@ package com.command;
 
 import java.util.Stack;
 
+import com.google.gson.GsonBuilder;
 import com.util.Block;
 
 public enum Command implements CommandInterface {
@@ -147,5 +148,10 @@ public enum Command implements CommandInterface {
         }
 
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }
