@@ -1,7 +1,5 @@
 package com.controller;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,11 +12,9 @@ import com.command.Command;
 import com.director.Director;
 import com.entity.Board;
 import com.entity.Codel;
-import com.entity.Metadata;
 import com.util.Block;
 import com.util.Color;
-import com.exception.ColorNotFoundException;
-
+import com.reader.FileReader;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +24,6 @@ public class Interpreter {
 	// So in the future we can handle pictures whose "pixels" are larger than 1. 
 	// Although in theory I think that the size of the pixels shouldn't matter, since everything would scale. Hmm...
 	private static int sizePix = 1;
-
-	private static int printLevel = 3;
 
 	public static Director director = new Director();
 
@@ -78,7 +72,9 @@ public class Interpreter {
 
 		// Board board = fileToBoard("tmp.txt");
 		Path tmpFile = Paths.get(runFile);
-		Board board = readFile(tmpFile);
+
+		FileReader reader = new FileReader(tmpFile);
+		Board board = reader.readFile();
 		
 		log.debug("THE BOARD:\n" + board.toString());
 
@@ -87,56 +83,10 @@ public class Interpreter {
 	}
 
 	/**
-	 * Takes in a .ppm file and converts it into a {@link Board}
-	 * @param path - path to the file to be read
-	 */
-	public static Board readFile(Path path) {
-		Board board;
-
-		try (Scanner sc = new Scanner(new File(path.toString()))) {
-
-			Metadata meta = new Metadata();
-			meta.setMagicNumber(sc.next());
-			meta.setColumn(sc.nextInt());
-			meta.setRow(sc.nextInt());
-			meta.setMaxVaL(sc.nextInt());
-
-			board = new Board(meta.getRow(), meta.getColumn());
-
-			for(int i = 0; i < meta.getRow(); i++) {
-				for(int j = 0; j < meta.getColumn(); j++) {
-					Integer red, blue, green;
-					
-					red = sc.nextInt();
-					blue = sc.nextInt();
-					green = sc.nextInt();
-
-					try {
-						Color color = Color.getColorFromValues(red, blue, green);
-						Codel coordinate = new Codel(i, j);
-						board.setColor(coordinate, color);
-					} catch(ColorNotFoundException e) {
-						e.printStackTrace();
-					}						
-				}
-			}
-
-			return board;
-		} catch (FileNotFoundException e) {
-			log.info("???");
-			log.info(e.toString());
-			System.exit(0);
-			return null;
-		}
-	}
-
-	/**
 	 * Given a {@link Board} holding a grid of {@link Block}, move through the board and perform the commands
 	 * @param board
 	 */
 	public static void readBoard(Board board) {
-		log.debug("STARTING TO READ BOARD");
-
 		List<Block> blocks = new ArrayList<>();
 
 		// initiate the very first Codel
@@ -189,49 +139,7 @@ public class Interpreter {
 
 		log.info("DONE");
 	}
-
-	//  
-	public static int findSizeCodel(Board board, Block c, Codel coord) { 
-		// codel is uninitiated, so I need to set its corners
-		if(c.getRightTop().getX() == -1) {
-			setCorners(c, coord);
-		}
-
-		int count = 0;
-		board.setVisited(coord, true);
-
-		// 4 directions the program will search in for more of the same color
-		Codel newCoordinate = new Codel();
-		for(int i = 0; i < 4; i++)
-		{
-			if(i == 0)
-				newCoordinate = new Codel(coord.getX(), coord.getY()-1);
-			else if(i == 1)
-				newCoordinate = new Codel(coord.getX(), coord.getY()+1);
-			else if(i == 2)
-				newCoordinate = new Codel(coord.getX()-1, coord.getY());
-			else if(i == 3)
-				newCoordinate = new Codel(coord.getX()+1, coord.getY());
-
-			// gonna skip this block if it's out of the board or visited
-			if(!inBounds(board, newCoordinate)) {
-				continue;
-			}
-
-			if(board.getVisited(newCoordinate)) {
-				continue;
-			}
-
-			if(board.getColor(newCoordinate) == c.getColor()) {
-				count++;
-				count += findSizeCodel(board, c, newCoordinate);
-				setCorners(c, newCoordinate);
-			}
-		}
-
-		return count;
-	}
-
+	
 	// Here, col1 represents the last color, col2 is the newest color
 	public static void getCommand(Block older, Block newer) {
 
@@ -259,8 +167,54 @@ public class Interpreter {
 		return;
 	}
 
+	//  
+	public static int findSizeCodel(Board board, Block c, Codel coord) { 
+		// codel is uninitiated, so I need to set its corners
+		if(c.getRightTop().getX() == -1) {
+			log.debug("Setting init corners");
+			setCorners(c, coord);
+		}
+
+		int count = 0;
+		board.setVisited(coord, true);
+
+		// 4 directions the program will search in for more of the same color
+		Codel newCoordinate = new Codel();
+		for(int i = 0; i < 4; i++) {
+			if(i == 0) {
+				newCoordinate = new Codel(coord.getX(), coord.getY()-1);
+			} else if(i == 1) {
+				newCoordinate = new Codel(coord.getX(), coord.getY()+1);
+			} else if(i == 2) {
+				newCoordinate = new Codel(coord.getX()-1, coord.getY());
+			} else if(i == 3) {
+				newCoordinate = new Codel(coord.getX()+1, coord.getY());
+			}
+			// gonna skip this block if it's out of the board or visited
+			if(!inBounds(board, newCoordinate)) {
+				continue;
+			}
+
+			// log.debug("new coord: " + newCoordinate.toString());
+
+			if(board.getVisited(newCoordinate)) {
+				continue;
+			}
+			
+			if(board.getColor(newCoordinate) == c.getColor()) {
+				setCorners(c, newCoordinate);
+				count++;
+				count += findSizeCodel(board, c, newCoordinate);
+			}
+		}
+
+		return count;
+	}
+
 	// Piet relies entirely on moving from a corner to a new color, need to set two corners (l, r) for each direction (l, r, u, d)
-	public static void setCorners(Block c, Codel coordinate) {
+	public static void setCorners(Block c, Codel coordinate) { 
+
+		// log.debug("setting coords now: " + coordinate.toString());
 
 		// potential for new right column value
 		if(coordinate.getY() >= c.getRightTop().getY() || c.getRightTop().getY() == -1) {

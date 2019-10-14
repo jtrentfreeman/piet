@@ -3,9 +3,6 @@ package com.util;
 import com.entity.Codel;
 import com.google.gson.GsonBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.entity.Board;
 
 /**
@@ -15,8 +12,6 @@ import com.entity.Board;
  * A colour block may be any shape and may have "holes" of other colours inside it, which are not considered part of the block.
  */
 public class Block {
-
-	private static final Logger log = LoggerFactory.getLogger(Block.class);
 
 	private Integer size;
 	private Color color;
