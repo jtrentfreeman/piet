@@ -37,6 +37,10 @@ public class Director {
         return this.dp;
     }
 
+    /**
+     * Toggles the CC
+     * @param val - the number of times to toggle the CC
+     */
     public void rotateCC(Integer val) {
         if(CommandController.correctMod(val, 2) == 0) {
             return;
@@ -49,6 +53,10 @@ public class Director {
         }
     }
 
+    /**
+     * Rotates the DP clockwise if val is positive (anticlockwise if val is negative)
+     * @param val - the number of times to rotate the DP
+     */
     public void rotateDP(Integer val) {
         if(val == 0) {
             return;
@@ -56,14 +64,21 @@ public class Director {
 
         if(val > 0) {
             while(val > 0) {
-                if(dp == DP.RIGHT) {
-                    dp = DP.DOWN;
-                } else if(dp == DP.DOWN) {
-                    dp = DP.LEFT;
-                } else if (dp == DP.LEFT) {
-                    dp = DP.UP;
-                } else if(dp == DP.UP) {
-                    dp = DP.RIGHT;
+                switch(dp) {
+                    case RIGHT:
+                        dp = DP.DOWN;
+                        break;
+                    case DOWN:
+                        dp = DP.LEFT;
+                        break;
+                    case LEFT:
+                        dp = DP.UP;
+                        break;
+                    case UP:
+                        dp = DP.RIGHT;
+                        break;
+                    default:
+                        break;
                 }
                 val--;
             }
@@ -71,14 +86,21 @@ public class Director {
 
         if(val < 0) {
             while(val < 0) {
-                if(dp == DP.RIGHT) {
-                    dp = DP.UP;
-                } else if(dp == DP.UP) {
-                    dp = DP.LEFT;
-                } else if(dp == DP.LEFT) {
-                    dp = DP.DOWN;
-                } else if(dp == DP.DOWN) {
-                    dp = DP.RIGHT;
+                switch(dp) {
+                    case RIGHT:
+                        dp = DP.UP;
+                        break;
+                    case UP:
+                        dp = DP.LEFT;
+                        break;
+                    case LEFT:
+                        dp = DP.DOWN;
+                        break;
+                    case DOWN:
+                        dp = DP.RIGHT;
+                        break;
+                    default:
+                        break;
                 }
                 val++;
             }

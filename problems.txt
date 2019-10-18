@@ -1,0 +1,8 @@
+comments in .ppm files fails
+
+nfib.ppm stops after 0 1
+
+loop.ppm takes stdin
+
+nhello.ppm ends with an emptystackexception
+

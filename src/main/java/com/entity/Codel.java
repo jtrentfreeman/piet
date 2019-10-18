@@ -39,6 +39,16 @@ public class Codel {
         return this.y;
     }
 
+    /**
+     * Returns true if the codel is within the bounds of the board
+     * @param board - the Board
+     * @return Boolean indicating whether Codel is in bounds
+     */
+    public Boolean isInBounds(Board board) {
+        return ((this.getX() >= 0) && this.getX() < board.getSizeRow()) && 
+			(this.getY() >= 0 && (this.getY() < board.getSizeCol()));
+    }
+
     @Override
     public String toString() {
         return new GsonBuilder().setPrettyPrinting().create().toJson(this);

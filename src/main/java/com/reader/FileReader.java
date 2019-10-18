@@ -31,7 +31,7 @@ public class FileReader {
     }
 
     public Board readFile() {
-        Board board = null;
+        Board board;
         ContentType contentType = null;
 
         try {
@@ -51,7 +51,7 @@ public class FileReader {
                 break;
         }
 
-        return board;
+        return null;
     }
 
     /**
