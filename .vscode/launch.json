@@ -10,7 +10,10 @@
             "request": "launch",
             "mainClass": "com.controller.Interpreter",
             "projectName": "pietInterpreter",
-            "args": "C:\\Users\\frejt\\code\\pietInterpreter\\ppm\\fancyhello.ppm"
+            "args": "C:\\Users\\frejt\\code\\pietInterpreter\\examples\\ppm\\nprime.ppm",
+            "classPaths": ["C:\\Users\\frejt\\code\\pietInterpreter\\build\\libs\\pietInterpreter-1.0.jar"],
+            "preLaunchTask": "build",
+            "webRoot":"${workspaceFolder}/src"
         },
         {
             "type": "java",
