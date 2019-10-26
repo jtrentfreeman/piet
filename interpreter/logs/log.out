@@ -1,0 +1,449 @@
+[19/09/08 18:04:54 DEBUG Interpreter:main():76]: THE BOARD
+[19/09/08 18:04:54 DEBUG Interpreter:main():77]: #0000ff #0000c0 #c0c0ff #c000c0 #ffffff #ffffff #0000ff 
+#00ff00 #c0c000 #c0c000 #c0c000 #c0c000 #c0c000 #ffffc0 
+#0000ff #0000c0 #ffffff #ffffff #ffffff #ffffff #ffffff 
+#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffc0ff 
+#0000ff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff 
+#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffc0c0 
+#0000ff #ffffff #000000 #000000 #000000 #ffffff #ffffff 
+#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #c000c0 
+#0000ff #000000 #0000ff #0000ff #0000ff #000000 #ffffff 
+#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff 
+#ffffff #ffffff #000000 #ffffff #000000 #ffffff #ffffff 
+#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff 
+#ffffff #ffffff #000000 #ffffff #ffffff #ffffff #ff00ff 
+#c0ffc0 #ffc0ff #00ffff #c0ffff #ffc0ff #0000c0 #0000ff 
+
+[19/09/08 18:04:54 DEBUG Interpreter:readBoard():131]: STARTING TO READ BOARD
+[19/09/08 18:04:55 DEBUG Interpreter:readBoard():140]: {
+  "color": "BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 0
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 0
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "topRight": {
+    "x": 0,
+    "y": 0
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:findSizeCodel():234]: SIZE OF {
+  "color": "BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 0
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 0
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "topRight": {
+    "x": 0,
+    "y": 0
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:readBoard():146]: {
+  "size": 1,
+  "color": "BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 0
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 0
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 0
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 0
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 0
+  },
+  "topRight": {
+    "x": 0,
+    "y": 0
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:findSizeCodel():234]: SIZE OF {
+  "color": "DARK_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 1
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 1
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "topRight": {
+    "x": 0,
+    "y": 1
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():258]: push
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():259]: []
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():260]: {
+  "color": "BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 1
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 1
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "topRight": {
+    "x": 0,
+    "y": 1
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():261]: {
+  "size": 1,
+  "color": "DARK_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 1
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 1
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 1
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 1
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 1
+  },
+  "topRight": {
+    "x": 0,
+    "y": 1
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:findSizeCodel():234]: SIZE OF {
+  "color": "LIGHT_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 2
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 2
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "topRight": {
+    "x": 0,
+    "y": 2
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():258]: push
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():259]: [null]
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():260]: {
+  "size": 1,
+  "color": "DARK_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 2
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 2
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "topRight": {
+    "x": 0,
+    "y": 2
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():261]: {
+  "size": 1,
+  "color": "LIGHT_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 2
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 2
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 2
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 2
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 2
+  },
+  "topRight": {
+    "x": 0,
+    "y": 2
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:findSizeCodel():234]: SIZE OF {
+  "color": "DARK_MAGENTA",
+  "rightTop": {
+    "x": 0,
+    "y": 3
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 3
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "topRight": {
+    "x": 0,
+    "y": 3
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():258]: multiply
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():259]: [null, 1]
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():260]: {
+  "size": 1,
+  "color": "LIGHT_BLUE",
+  "rightTop": {
+    "x": 0,
+    "y": 3
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 3
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "topRight": {
+    "x": 0,
+    "y": 3
+  }
+}
+[19/09/08 18:04:55 DEBUG Interpreter:getCommand():261]: {
+  "size": 1,
+  "color": "DARK_MAGENTA",
+  "rightTop": {
+    "x": 0,
+    "y": 3
+  },
+  "rightBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomRight": {
+    "x": 0,
+    "y": 3
+  },
+  "bottomLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "leftBottom": {
+    "x": 0,
+    "y": 3
+  },
+  "leftTop": {
+    "x": 0,
+    "y": 3
+  },
+  "topLeft": {
+    "x": 0,
+    "y": 3
+  },
+  "topRight": {
+    "x": 0,
+    "y": 3
+  }
+}

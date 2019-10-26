@@ -1,4 +1,4 @@
-# pietInterpreter
+# Piet
 
 To run:
 
