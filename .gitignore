@@ -1,7 +1,13 @@
-/Codel.class
-/Interpreter.class
-.gradle/*
-.settings/*
 build/*
 bin/*
 .classpath
+
+*.gradle
+*.settings
+*.vscode
+*.class
+*.stackdump
+*.project
+
+*logs/
+*build/

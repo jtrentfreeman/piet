@@ -54,7 +54,7 @@ public class Interpreter {
      */
 	public static void main(String[] args) throws IOException {
 
-		String log4jConfPath = "log4j.properties";
+		String log4jConfPath = "interpreter/log4j.properties";
 		PropertyConfigurator.configure(log4jConfPath);
 
 		String runFile = null;
