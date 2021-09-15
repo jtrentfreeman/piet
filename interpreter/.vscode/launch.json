@@ -9,11 +9,10 @@
             "name": "CodeLens (Launch) - Interpreter",
             "request": "launch",
             "mainClass": "com.controller.Interpreter",
-            "projectName": "pietInterpreter",
-            "args": "C:\\Users\\frejt\\code\\pietInterpreter\\examples\\ppm\\nprime.ppm",
-            "classPaths": ["C:\\Users\\frejt\\code\\pietInterpreter\\build\\libs\\pietInterpreter-1.0.jar"],
-            "preLaunchTask": "build",
-            "webRoot":"${workspaceFolder}/src"
+            "projectName": "interpreter",
+            "args": "C:\\Users\\frejt\\code\\piet\\interpreter\\examples\\ppm\\nprime.ppm",
+            "classPaths": ["C:\\Users\\frejt\\code\\piet\\interpreter\\build\\libs\\interpreter-1.0.jar"],
+            "preLaunchTask": "buildInterpreter"
         },
         {
             "type": "java",
