@@ -1,0 +1,169 @@
+package com.frejt.piet.reader;
+
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Scanner;
+
+import javax.imageio.ImageIO;
+
+import com.frejt.piet.entity.Board;
+import com.frejt.piet.entity.Codel;
+import com.frejt.piet.entity.PPMMetadata;
+import com.frejt.piet.exception.ColorNotFoundException;
+import com.frejt.piet.exception.ContentTypeNotFoundException;
+import com.frejt.piet.exception.FileNotReadException;
+import com.frejt.piet.util.Color;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Class dedicated to reading a Piet file.
+ */
+public class FileReader {
+
+	private static final Logger log = LogManager.getLogger(FileReader.class);
+
+	/**
+	 * A path to a Piet file.
+	 */
+	private Path path;
+
+	public FileReader(Path path) {
+		this.path = path;
+	}
+
+	/**
+	 * Converts a file of a known {@link ContentType} into a {@link Board}.
+	 * 
+	 * @return a Board representing the {@link #path}s file.
+	 * @throws FileNotReadException
+	 */
+	public Board convertFileToBoard() throws FileNotReadException {
+
+		ContentType contentType = getFileType();
+
+		switch (contentType) {
+			case PPM:
+				return readPpm();
+			case PNG:
+				return readPng();
+			default:
+				break;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the {@link ContentType} of the file this reader is reading.
+	 * 
+	 * @return the appropriate {@link ContentType}
+	 */
+	public ContentType getFileType() throws FileNotReadException {
+
+		ContentType contentType = null;
+
+		try {
+			contentType = ContentType.getContentType(Files.probeContentType(path));
+		} catch (IOException e) {
+			log.error("Could not read file", e.getMessage());
+			throw new FileNotReadException();
+		} catch (ContentTypeNotFoundException e) {
+			log.error(e.getMessage());
+			throw new FileNotReadException();
+		}
+
+		return contentType;
+
+	}
+
+	/**
+	 * Takes in a {@link ContentType#PPM} file and converts it into a {@link Board}
+	 * 
+	 * @return a {@link Board} representing the file
+	 */
+	private Board readPpm() {
+		Board board;
+
+		try (Scanner sc = new Scanner(path.toFile())) {
+			log.debug(Files.probeContentType(path));
+
+			PPMMetadata meta = new PPMMetadata();
+			meta.setMagicNumber(sc.next());
+			meta.setColumn(sc.nextInt());
+			meta.setRow(sc.nextInt());
+			meta.setMaxVaL(sc.nextInt());
+
+			board = new Board(meta.getRow(), meta.getColumn());
+
+			for (int i = 0; i < meta.getRow(); i++) {
+				for (int j = 0; j < meta.getColumn(); j++) {
+					Integer red, blue, green;
+
+					red = sc.nextInt();
+					blue = sc.nextInt();
+					green = sc.nextInt();
+
+					try {
+						Color color = Color.getColorFromValues(red, blue, green);
+						Codel coordinate = new Codel(i, j);
+						board.setColor(coordinate, color);
+					} catch (ColorNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			return board;
+		} catch (FileNotFoundException e) {
+			log.info("???");
+			log.info(e.toString());
+			System.exit(0);
+			return null;
+		} catch (IOException e) {
+			System.exit(0);
+			return null;
+		}
+	}
+
+	/**
+	 * Takes in a {@link ContentType#PPM} file and converts it into a {@link Board}
+	 * 
+	 * @return a {@link Board} representing the file
+	 */
+	private Board readPng() {
+		Board board;
+
+		try {
+			BufferedImage image = ImageIO.read(new FileInputStream(path.toFile()));
+			board = new Board(image.getHeight(), image.getWidth());
+			for (int i = 0; i < image.getHeight(); i++) {
+				for (int j = 0; j < image.getWidth(); j++) {
+					Integer clr = image.getRGB(j, i);
+					Integer red = (clr & 0x00ff0000) >> 16;
+					Integer green = (clr & 0x0000ff00) >> 8;
+					Integer blue = clr & 0x000000ff;
+
+					try {
+						Color color = Color.getColorFromValues(red, green, blue);
+						Codel coordinate = new Codel(i, j);
+						board.setColor(coordinate, color);
+					} catch (ColorNotFoundException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
+			return board;
+		} catch (IOException e) {
+			log.debug(e + "");
+		}
+		return null;
+	}
+
+}
