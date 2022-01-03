@@ -6,20 +6,29 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeLens (Launch) - Interpreter",
+            "name": "Launch Current File",
             "request": "launch",
-            "mainClass": "com.controller.Interpreter",
-            "projectName": "pietInterpreter",
-            "args": "C:\\Users\\frejt\\code\\pietInterpreter\\examples\\ppm\\nprime.ppm",
-            "classPaths": ["C:\\Users\\frejt\\code\\pietInterpreter\\build\\libs\\pietInterpreter-1.0.jar"],
-            "preLaunchTask": "build",
-            "webRoot":"${workspaceFolder}/src"
+            "mainClass": "${file}"
         },
         {
             "type": "java",
-            "name": "Debug (Launch) - Current File",
+            "name": "Launch Piet Interpreter (PNG)",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "com.frejt.piet.controller.Interpreter",
+            "projectName": "app",
+            "args": [
+                "C:\\Users\\frejt\\code\\newPiet\\app\\examples\\png\\hw2-2.png"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Launch Piet Interpreter (PPM)",
+            "request": "launch",
+            "mainClass": "com.frejt.piet.controller.Interpreter",
+            "projectName": "app",
+            "args": [
+                "C:\\Users\\frejt\\code\\newPiet\\app\\examples\\ppm\\nfib.ppm"
+            ]
         }
     ]
 }

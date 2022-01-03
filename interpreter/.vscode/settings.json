@@ -1,11 +1,3 @@
 {
-    "files.autoSave": "onWindowChange",
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "files.exclude": {
-        "**/.classpath": true,
-        "**/.project": true,
-        "**/.settings": true,
-        "**/.factorypath": true
-    }
-    "editor.rulers": [140]
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

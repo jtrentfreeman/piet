@@ -26,6 +26,10 @@ public class Generator {
             log.debug(s);
         }
 
+        List<Command> commands = new ArrayList<>();
+
+        commands.add(getRandomCommand());
+
         // convert input to numbers
         List<Integer> nums = numbers(input);
         List<List<Integer>> numStack = new ArrayList<>();
@@ -41,6 +45,20 @@ public class Generator {
         // convert formula to piet board
 
         // generate image based on formula
+    }
+
+    public static Command getRandomCommand() {
+        Random r = new Random();
+        Integer nextCommand = r.nextInt(Command.values().length);
+        log.info(nextCommand + "");
+        return Command.values()[nextCommand];
+    }
+
+    public static Integer getPotentialNextInteger() {
+
+        
+
+        return null;
     }
 
     public static List<Integer> numbers(String input) {
