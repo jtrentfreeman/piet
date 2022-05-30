@@ -41,7 +41,7 @@ public class FileReader {
 	 * Converts a file of a known {@link ContentType} into a {@link Board}.
 	 * 
 	 * @return a Board representing the {@link #path}s file.
-	 * @throws FileNotReadException
+	 * @throws FileNotReadException if the file was, for any reason, not able to be read
 	 */
 	public Board convertFileToBoard() throws FileNotReadException {
 
@@ -63,6 +63,7 @@ public class FileReader {
 	 * Gets the {@link ContentType} of the file this reader is reading.
 	 * 
 	 * @return the appropriate {@link ContentType}
+	 * @throws FileNotReadException if the file was, for any reason, not able to be read
 	 */
 	public ContentType getFileType() throws FileNotReadException {
 
@@ -71,11 +72,9 @@ public class FileReader {
 		try {
 			contentType = ContentType.getContentType(Files.probeContentType(path));
 		} catch (IOException e) {
-			log.error("Could not read file", e.getMessage());
-			throw new FileNotReadException();
+			throw new FileNotReadException("Could not read file: " + e.getMessage());
 		} catch (ContentTypeNotFoundException e) {
-			log.error(e.getMessage());
-			throw new FileNotReadException();
+			throw new FileNotReadException("Could not read file: " + e.getMessage());
 		}
 
 		return contentType;
@@ -87,7 +86,7 @@ public class FileReader {
 	 * 
 	 * @return a {@link Board} representing the file
 	 */
-	private Board readPpm() {
+	private Board readPpm() throws FileNotReadException {
 		Board board;
 
 		try (Scanner sc = new Scanner(path.toFile())) {
@@ -105,6 +104,8 @@ public class FileReader {
 				for (int j = 0; j < meta.getColumn(); j++) {
 					Integer red, blue, green;
 
+					// TODO: read line and remove everything after "#"
+
 					red = sc.nextInt();
 					blue = sc.nextInt();
 					green = sc.nextInt();
@@ -121,13 +122,9 @@ public class FileReader {
 
 			return board;
 		} catch (FileNotFoundException e) {
-			log.info("???");
-			log.info(e.toString());
-			System.exit(0);
-			return null;
+			throw new FileNotReadException(e.getMessage());
 		} catch (IOException e) {
-			System.exit(0);
-			return null;
+			throw new FileNotReadException(e.getMessage());
 		}
 	}
 
@@ -136,7 +133,7 @@ public class FileReader {
 	 * 
 	 * @return a {@link Board} representing the file
 	 */
-	private Board readPng() {
+	private Board readPng() throws FileNotReadException {
 		Board board;
 
 		try {
@@ -154,16 +151,15 @@ public class FileReader {
 						Codel coordinate = new Codel(i, j);
 						board.setColor(coordinate, color);
 					} catch (ColorNotFoundException e) {
-						e.printStackTrace();
+						log.error("Could not get color at index [" + i + ", " + j + "])", e.getMessage());
 					}
 
 				}
 			}
 			return board;
 		} catch (IOException e) {
-			log.debug(e + "");
+			throw new FileNotReadException(e.getMessage());
 		}
-		return null;
 	}
 
 }

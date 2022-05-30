@@ -17,29 +17,30 @@ import org.apache.logging.log4j.Logger;
  * This file acts as the entry poiht to the program.
  * 
  * To run:
- * ./gradlew run --args="<path to file>"
+ * {@code ./gradlew run --args="<path to file>"}
  * 
  * Known bugs:
- *  - After sliding across a white space, a command can still take place involving the colour of the block before the slide.
- *    Seen using: loop.ppm
+ * - After sliding across a white space, a command can still take place
+ * involving the colour of the block before the slide.
+ * Seen using: loop.ppm
  * 
  * Working files:
- *  - fancyhello.ppm
- *  - hi.ppm
- *  - loop.ppm (kind of)
- *  - nhello.ppm
- *  - nprime.ppm
- *  - Piet_hello.png
+ * - fancyhello.ppm
+ * - hi.ppm
+ * - loop.ppm (kind of)
+ * - nhello.ppm
+ * - nprime.ppm
+ * - Piet_hello.png
  * 
  * Failed files:
- *  - loop.ppm (kind of)
- *  - nfib.ppm
- *  - hw2-1.png (I think we don't fail during white space sliding)
- *  - Piet-1.png
+ * - loop.ppm (kind of)
+ * - nfib.ppm
+ * - hw2-1.png (I think we don't fail during white space sliding)
+ * - Piet-1.png
  * 
  * This program is being ran with:
- *  - Java      11.0.4
- *  - Gradle    7.2
+ * - Java 11.0.4
+ * - Gradle 7.2
  */
 public class Interpreter {
 
@@ -50,6 +51,8 @@ public class Interpreter {
      * 
      * @param args
      *             args[0] - String holding n image's file path
+     * @throws FileNotReadException if the file was, for any reason, not able to be
+     *                              read
      */
     public static void main(String args[]) throws FileNotReadException {
         Path runFile = getRunFile(args);
@@ -76,13 +79,13 @@ public class Interpreter {
      */
     public static Path getRunFile(String[] args) {
 
-        String runFileStr = null;
+        String runFileStr;
         Scanner sc;
 
         // If the user provided an argument, use it
         if (args.length > 0) {
             runFileStr = args[0];
-        } else if (runFileStr == null) {
+        } else {
             System.err.println("Please enter the path to the file to be ran:");
             sc = new Scanner(System.in);
             runFileStr = sc.nextLine();

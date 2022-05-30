@@ -148,7 +148,7 @@ public class BoardRunner {
      * passed in Block's corner Codels.
      * 
      * @param block the current block
-     * @return
+     * @return the next Codel to be part of the execution
      */
     public static Codel getNextCodel(Block block) {
 
@@ -306,10 +306,13 @@ public class BoardRunner {
      * It does not use the procedure described above for determining where the
      * interpreter emerges from non-white coloured blocks.
      * 
-     * @param board
-     * @param coordinate
-     * @param attempt
-     * @return
+     * @param board         the board being traversed
+     * @param coordinate    the Codel to start traversal from
+     * @param previousColor the most recent non-white/non-block Codel to have been
+     *                      ran
+     * @param attempt       how many attempts have been made to escape the current
+     *                      white space
+     * @return the next non-white Codel to start the program at
      */
     public static Codel getNextCodelWhite(Board board, Codel coordinate, Codel previousColor, int attempt) {
 
@@ -334,7 +337,8 @@ public class BoardRunner {
                     // If it hits a restriction, the CC is toggled. Since this results in no
                     // difference in where the interpreter is trying to go, the DP is immediately
                     // stepped clockwise.
-                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK) || newNext.equals(previousColor)) {
+                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK)
+                            || newNext.equals(previousColor)) {
                         director.rotateCC(1);
                         director.rotateDP(1);
                         return getNextCodelWhite(board, next, previousColor, attempt + 1);
@@ -349,7 +353,8 @@ public class BoardRunner {
                 while (board.getColor(next).equals(Color.WHITE)) {
                     newNext = new Codel(nextRow, nextCol - 1);
 
-                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK) || newNext.equals(previousColor)) {
+                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK)
+                            || newNext.equals(previousColor)) {
                         director.rotateCC(1);
                         director.rotateDP(1);
                         return getNextCodelWhite(board, next, previousColor, attempt + 1);
@@ -364,7 +369,8 @@ public class BoardRunner {
                 while (board.getColor(next).equals(Color.WHITE)) {
                     newNext = new Codel(nextRow + 1, nextCol);
 
-                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK) || newNext.equals(previousColor)) {
+                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK)
+                            || newNext.equals(previousColor)) {
                         director.rotateCC(1);
                         director.rotateDP(1);
                         return getNextCodelWhite(board, next, previousColor, attempt + 1);
@@ -379,7 +385,8 @@ public class BoardRunner {
                 while (board.getColor(next).equals(Color.WHITE)) {
                     newNext = new Codel(nextRow - 1, nextCol);
 
-                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK) || newNext.equals(previousColor)) {
+                    if (!newNext.isInBounds(board) || board.getColor(newNext).equals(Color.BLACK)
+                            || newNext.equals(previousColor)) {
                         director.rotateCC(1);
                         director.rotateDP(1);
 
