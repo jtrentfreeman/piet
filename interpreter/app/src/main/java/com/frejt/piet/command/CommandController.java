@@ -461,9 +461,9 @@ public class CommandController {
      * - -1 mod 3 = 2
      * - -4 mod 3 = 2
      * 
-     * @param dividend
-     * @param divisor
-     * @return
+     * @param dividend the number being "divided" in order to get the remainder
+     * @param divisor  the number that is dividing
+     * @return the remainder after being modded by the appropriate standard
      */
     public static Integer correctMod(int dividend, int divisor) {
         while (dividend < 0)

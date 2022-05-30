@@ -4,6 +4,15 @@ Here's the things I want to do with this project:
       Follow the stack trace of a piet program
       Give input that would turn into a piet program
         Users could constantly regenerate different random programs that would output that input
-  Allow any photo type, jpg, png, etc, not just .ppm
+        get a database involved
+        tbh npiet already has a pretty decent site for all this
+          it isn't pretty but it does the job I was intending
+          https://www.bertnase.de/npiet/
+  Allow any photo type, jpg, etc, not just .ppm/.png  
+    Better ppm reader (we only allow ascii ppm right now)
+  Dockerize
   Use gradle well
-  Unit tests
+  Unit tests (in more substantial capacity)
+  Read files with comments in them plz
+  Better logging
+  Better arguments (verbose, max steps)
